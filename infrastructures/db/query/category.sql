@@ -32,9 +32,9 @@ ORDER BY category_name ASC;
 
 -- name: GetCategoryDescendants :many
 WITH RECURSIVE category_tree AS (
-    SELECT category_id, category_name, parent_id, created_at, updated_at, is_deleted, 0 as level
-    FROM categories
-    WHERE category_id = $1 AND is_deleted = FALSE
+    SELECT c.category_id, c.category_name, c.parent_id, c.created_at, c.updated_at, c.is_deleted, 0 as level
+    FROM categories c
+    WHERE c.category_id = $1 AND c.is_deleted = FALSE
     
     UNION ALL
     
@@ -49,9 +49,9 @@ ORDER BY level, category_name;
 
 -- name: GetCategoryPath :many
 WITH RECURSIVE category_path AS (
-    SELECT category_id, category_name, parent_id, created_at, updated_at, is_deleted, 0 as level
-    FROM categories
-    WHERE category_id = $1 AND is_deleted = FALSE
+    SELECT c.category_id, c.category_name, c.parent_id, c.created_at, c.updated_at, c.is_deleted, 0 as level
+    FROM categories c
+    WHERE c.category_id = $1 AND c.is_deleted = FALSE
     
     UNION ALL
     

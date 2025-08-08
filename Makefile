@@ -13,5 +13,7 @@ migrateup:
 migratedown:
 	migrate -path infrastructures/db/migration -database postgres://root:supersecret@localhost:5432/gomart_db?sslmode=disable -verbose down
 
+sqlc:
+	sqlc generate
 
-.PHONY: postgres createdb dropdb migratedown migratedown
+.PHONY: postgres createdb dropdb migratedown migratedown sqlcxs
