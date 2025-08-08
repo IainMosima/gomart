@@ -1,7 +1,5 @@
 package schema
 
-import "github.com/google/uuid"
-
 type CreateCustomerRequest struct {
 	Email          string  `json:"email" validate:"required,email,max=255"`
 	FirstName      string  `json:"first_name" validate:"required,min=1,max=100"`

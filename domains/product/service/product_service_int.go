@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
+	"github.com/IainMosima/gomart/domains/product/schema"
 	"github.com/google/uuid"
-	"gomart/domains/product/schema"
 )
 
 type ProductService interface {

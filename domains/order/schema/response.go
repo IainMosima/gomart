@@ -3,8 +3,8 @@ package schema
 import (
 	"time"
 
+	"github.com/IainMosima/gomart/domains/order/entity"
 	"github.com/google/uuid"
-	"gomart/domains/order/entity"
 )
 
 type OrderResponse struct {

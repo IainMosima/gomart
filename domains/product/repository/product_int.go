@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 
+	"github.com/IainMosima/gomart/domains/product/entity"
 	"github.com/google/uuid"
-	"gomart/domains/product/entity"
 )
 
 type ProductRepository interface {
