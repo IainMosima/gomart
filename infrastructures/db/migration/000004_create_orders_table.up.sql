@@ -10,5 +10,6 @@ CREATE TABLE IF NOT EXISTS orders (
     billing_address TEXT NOT NULL,
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+    is_deleted BOOLEAN DEFAULT FALSE
 );
