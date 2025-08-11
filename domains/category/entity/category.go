@@ -29,3 +29,9 @@ type CategoryPath struct {
 	Categories []*Category `json:"path"`
 	Depth      int         `json:"depth"`
 }
+
+type CategoryHierarchy struct {
+	Category
+	Level    int                  `json:"level" db:"level"`
+	Children []*CategoryHierarchy `json:"children,omitempty"`
+}

@@ -42,3 +42,5 @@ app.env
 bin/
 
 *.env
+
+backend-assessment.pdf
