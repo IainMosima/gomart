@@ -1,6 +1,8 @@
 package handlers
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 type CategoryHandlerInterface interface {
 	CreateCategory(c *gin.Context)
@@ -8,4 +10,5 @@ type CategoryHandlerInterface interface {
 	UpdateCategory(c *gin.Context)
 	ListCategories(c *gin.Context)
 	GetCategoryChildren(c *gin.Context)
+	GetCategoryAverageProductPrice(c *gin.Context)
 }

@@ -119,6 +119,24 @@ func (r *CategoryRepositoryImpl) SoftDelete(ctx context.Context, id uuid.UUID) e
 	return r.store.SoftDeleteCategory(ctx, id)
 }
 
+func (r *CategoryRepositoryImpl) GetAverageProductPrice(ctx context.Context, categoryID uuid.UUID) (float64, error) {
+	result, err := r.store.GetCategoryAverageProductPrice(ctx, categoryID)
+	if err != nil {
+		return 0, err
+	}
+
+	if !result.Valid {
+		return 0, nil
+	}
+
+	price, err := result.Float64Value()
+	if err != nil {
+		return 0, err
+	}
+
+	return price.Float64, nil
+}
+
 func (r *CategoryRepositoryImpl) convertToEntity(dbCategory db.Category) *entity.Category {
 	category := &entity.Category{
 		CategoryID:   dbCategory.CategoryID,

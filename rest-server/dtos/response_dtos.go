@@ -18,3 +18,9 @@ type CategoryListResponseDTO struct {
 	Categories []*CategoryResponseDTO `json:"categories"`
 	Total      int64                  `json:"total"`
 }
+
+type CategoryAverageProductPriceResponseDTO struct {
+	CategoryID   uuid.UUID `json:"category_id"`
+	CategoryName string    `json:"category_name"`
+	AveragePrice float64   `json:"average_price"`
+}

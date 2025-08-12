@@ -21,7 +21,6 @@ type GetCategoryTreeRequest struct {
 }
 
 type ListCategoriesRequest struct {
-	ParentID    *uuid.UUID `json:"parent_id,omitempty"`
-	RootOnly    bool       `json:"root_only,omitempty"`
-	IncludeTree bool       `json:"include_tree,omitempty"`
+	ParentID *uuid.UUID `json:"parent_id,omitempty"`
+	RootOnly bool       `json:"root_only,omitempty"`
 }

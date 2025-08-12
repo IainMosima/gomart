@@ -16,4 +16,28 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: postgres createdb dropdb migratedown migratedown sqlcxs
+mockgen:
+	@echo "Usage: make mockgen SOURCE=path/to/interface.go DEST=mocks/mock_name.go"
+	@echo "Example: make mockgen SOURCE=domains/category/repository/category_repo_int.go DEST=mocks/category_repo_mock.go"
+
+test:
+	go test ./... -v
+
+test-coverage:
+	go test ./... -cover
+
+test-coverage-html:
+	go test ./... -coverprofile=coverage.out
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report generated: coverage.html"
+
+test-category:
+	go test ./services/category/... ./infrastructures/repository/... ./rest-server/handlers/... -v
+
+test-category-coverage:
+	go test ./services/category/... ./infrastructures/repository/... ./rest-server/handlers/... -cover
+
+clean-coverage:
+	rm -f coverage.out coverage.html
+
+.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen test test-coverage test-coverage-html test-category test-category-coverage clean-coverage

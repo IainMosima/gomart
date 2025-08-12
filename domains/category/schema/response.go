@@ -44,3 +44,9 @@ type CategoryStatsResponse struct {
 	RootCategories  int64 `json:"root_categories"`
 	MaxDepth        int   `json:"max_depth"`
 }
+
+type CategoryAverageProductPriceResponse struct {
+	CategoryID   uuid.UUID `json:"category_id"`
+	CategoryName string    `json:"category_name"`
+	AveragePrice float64   `json:"average_price"`
+}

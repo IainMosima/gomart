@@ -12,28 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countCategories = `-- name: CountCategories :one
-SELECT COUNT(*) FROM categories WHERE is_deleted = FALSE
-`
-
-func (q *Queries) CountCategories(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countCategories)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const countRootCategories = `-- name: CountRootCategories :one
-SELECT COUNT(*) FROM categories WHERE parent_id IS NULL AND is_deleted = FALSE
-`
-
-func (q *Queries) CountRootCategories(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countRootCategories)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const createCategory = `-- name: CreateCategory :one
 INSERT INTO categories (category_name, parent_id)
 VALUES ($1, $2)
@@ -47,26 +25,6 @@ type CreateCategoryParams struct {
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
 	row := q.db.QueryRow(ctx, createCategory, arg.CategoryName, arg.ParentID)
-	var i Category
-	err := row.Scan(
-		&i.CategoryID,
-		&i.CategoryName,
-		&i.ParentID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
-}
-
-const createRootCategory = `-- name: CreateRootCategory :one
-INSERT INTO categories (category_name)
-VALUES ($1)
-RETURNING category_id, category_name, parent_id, created_at, updated_at, is_deleted
-`
-
-func (q *Queries) CreateRootCategory(ctx context.Context, categoryName string) (Category, error) {
-	row := q.db.QueryRow(ctx, createRootCategory, categoryName)
 	var i Category
 	err := row.Scan(
 		&i.CategoryID,
@@ -99,24 +57,20 @@ func (q *Queries) GetCategory(ctx context.Context, categoryID uuid.UUID) (Catego
 	return i, err
 }
 
-const getCategoryByName = `-- name: GetCategoryByName :one
-SELECT category_id, category_name, parent_id, created_at, updated_at, is_deleted
-FROM categories
-WHERE category_name = $1 AND is_deleted = FALSE
+const getCategoryAverageProductPrice = `-- name: GetCategoryAverageProductPrice :one
+SELECT COALESCE(AVG(p.price), 0.00)::DECIMAL(10,2) as average_price
+FROM categories c
+LEFT JOIN products p ON c.category_id = p.category_id 
+WHERE c.category_id = $1 AND c.is_deleted = FALSE 
+AND (p.is_deleted = FALSE OR p.is_deleted IS NULL) 
+AND (p.is_active = TRUE OR p.is_active IS NULL)
 `
 
-func (q *Queries) GetCategoryByName(ctx context.Context, categoryName string) (Category, error) {
-	row := q.db.QueryRow(ctx, getCategoryByName, categoryName)
-	var i Category
-	err := row.Scan(
-		&i.CategoryID,
-		&i.CategoryName,
-		&i.ParentID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
+func (q *Queries) GetCategoryAverageProductPrice(ctx context.Context, categoryID uuid.UUID) (pgtype.Numeric, error) {
+	row := q.db.QueryRow(ctx, getCategoryAverageProductPrice, categoryID)
+	var average_price pgtype.Numeric
+	err := row.Scan(&average_price)
+	return average_price, err
 }
 
 const getCategoryChildren = `-- name: GetCategoryChildren :many
@@ -142,118 +96,6 @@ func (q *Queries) GetCategoryChildren(ctx context.Context, parentID pgtype.UUID)
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.IsDeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getCategoryDescendants = `-- name: GetCategoryDescendants :many
-WITH RECURSIVE category_tree AS (
-    SELECT c.category_id, c.category_name, c.parent_id, c.created_at, c.updated_at, c.is_deleted, 0 as level
-    FROM categories c
-    WHERE c.category_id = $1 AND c.is_deleted = FALSE
-    
-    UNION ALL
-    
-    SELECT c.category_id, c.category_name, c.parent_id, c.created_at, c.updated_at, c.is_deleted, ct.level + 1
-    FROM categories c
-    INNER JOIN category_tree ct ON c.parent_id = ct.category_id
-    WHERE c.is_deleted = FALSE
-)
-SELECT category_id, category_name, parent_id, created_at, updated_at, is_deleted, level
-FROM category_tree
-ORDER BY level, category_name
-`
-
-type GetCategoryDescendantsRow struct {
-	CategoryID   uuid.UUID          `json:"category_id"`
-	CategoryName string             `json:"category_name"`
-	ParentID     pgtype.UUID        `json:"parent_id"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
-	IsDeleted    pgtype.Bool        `json:"is_deleted"`
-	Level        int32              `json:"level"`
-}
-
-func (q *Queries) GetCategoryDescendants(ctx context.Context, categoryID uuid.UUID) ([]GetCategoryDescendantsRow, error) {
-	rows, err := q.db.Query(ctx, getCategoryDescendants, categoryID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetCategoryDescendantsRow{}
-	for rows.Next() {
-		var i GetCategoryDescendantsRow
-		if err := rows.Scan(
-			&i.CategoryID,
-			&i.CategoryName,
-			&i.ParentID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsDeleted,
-			&i.Level,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getCategoryPath = `-- name: GetCategoryPath :many
-WITH RECURSIVE category_path AS (
-    SELECT c.category_id, c.category_name, c.parent_id, c.created_at, c.updated_at, c.is_deleted, 0 as level
-    FROM categories c
-    WHERE c.category_id = $1 AND c.is_deleted = FALSE
-    
-    UNION ALL
-    
-    SELECT c.category_id, c.category_name, c.parent_id, c.created_at, c.updated_at, c.is_deleted, cp.level + 1
-    FROM categories c
-    INNER JOIN category_path cp ON cp.parent_id = c.category_id
-    WHERE c.is_deleted = FALSE
-)
-SELECT category_id, category_name, parent_id, created_at, updated_at, is_deleted, level
-FROM category_path
-ORDER BY level DESC
-`
-
-type GetCategoryPathRow struct {
-	CategoryID   uuid.UUID          `json:"category_id"`
-	CategoryName string             `json:"category_name"`
-	ParentID     pgtype.UUID        `json:"parent_id"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
-	IsDeleted    pgtype.Bool        `json:"is_deleted"`
-	Level        int32              `json:"level"`
-}
-
-func (q *Queries) GetCategoryPath(ctx context.Context, categoryID uuid.UUID) ([]GetCategoryPathRow, error) {
-	rows, err := q.db.Query(ctx, getCategoryPath, categoryID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []GetCategoryPathRow{}
-	for rows.Next() {
-		var i GetCategoryPathRow
-		if err := rows.Scan(
-			&i.CategoryID,
-			&i.CategoryName,
-			&i.ParentID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsDeleted,
-			&i.Level,
 		); err != nil {
 			return nil, err
 		}
@@ -331,32 +173,6 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 		return nil, err
 	}
 	return items, nil
-}
-
-const moveCategoryToParent = `-- name: MoveCategoryToParent :one
-UPDATE categories
-SET parent_id = $2, updated_at = NOW()
-WHERE category_id = $1 AND is_deleted = FALSE
-RETURNING category_id, category_name, parent_id, created_at, updated_at, is_deleted
-`
-
-type MoveCategoryToParentParams struct {
-	CategoryID uuid.UUID   `json:"category_id"`
-	ParentID   pgtype.UUID `json:"parent_id"`
-}
-
-func (q *Queries) MoveCategoryToParent(ctx context.Context, arg MoveCategoryToParentParams) (Category, error) {
-	row := q.db.QueryRow(ctx, moveCategoryToParent, arg.CategoryID, arg.ParentID)
-	var i Category
-	err := row.Scan(
-		&i.CategoryID,
-		&i.CategoryName,
-		&i.ParentID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
 }
 
 const softDeleteCategory = `-- name: SoftDeleteCategory :exec

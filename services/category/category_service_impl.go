@@ -60,8 +60,20 @@ func (s *CategoryServiceImpl) UpdateCategory(ctx context.Context, categoryID uui
 	return s.entityToResponse(updatedCategory), nil
 }
 
-func (s *CategoryServiceImpl) ListCategories(ctx context.Context) (*schema.CategoryListResponse, error) {
-	categories, err := s.categoryRepo.GetAll(ctx)
+func (s *CategoryServiceImpl) ListCategories(ctx context.Context, req *schema.ListCategoriesRequest) (*schema.CategoryListResponse, error) {
+	var categories []entity.Category
+	var err error
+
+	if req == nil {
+		categories, err = s.categoryRepo.GetAll(ctx)
+	} else if req.RootOnly {
+		categories, err = s.categoryRepo.GetRootCategories(ctx)
+	} else if req.ParentID != nil {
+		categories, err = s.categoryRepo.GetByParent(ctx, req.ParentID)
+	} else {
+		categories, err = s.categoryRepo.GetAll(ctx)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +103,24 @@ func (s *CategoryServiceImpl) GetCategoryChildren(ctx context.Context, parentID 
 	return &schema.CategoryListResponse{
 		Categories: responses,
 		Total:      int64(len(responses)),
+	}, nil
+}
+
+func (s *CategoryServiceImpl) GetCategoryAverageProductPrice(ctx context.Context, categoryID uuid.UUID) (*schema.CategoryAverageProductPriceResponse, error) {
+	category, err := s.categoryRepo.GetByID(ctx, categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	averagePrice, err := s.categoryRepo.GetAverageProductPrice(ctx, categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &schema.CategoryAverageProductPriceResponse{
+		CategoryID:   category.CategoryID,
+		CategoryName: category.CategoryName,
+		AveragePrice: averagePrice,
 	}, nil
 }
 

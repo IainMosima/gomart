@@ -1,3 +1,5 @@
+//go:generate mockgen -source=category_repo_int.go -destination=category_repo_mock.go -package=repository
+
 package repository
 
 import (
@@ -15,4 +17,5 @@ type CategoryRepository interface {
 	GetAll(ctx context.Context) ([]entity.Category, error)
 	Update(ctx context.Context, category *entity.Category) (*entity.Category, error)
 	SoftDelete(ctx context.Context, id uuid.UUID) error
+	GetAverageProductPrice(ctx context.Context, categoryID uuid.UUID) (float64, error)
 }

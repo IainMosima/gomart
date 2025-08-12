@@ -110,7 +110,32 @@ func (h *CategoryHandlerImpl) UpdateCategory(c *gin.Context) {
 }
 
 func (h *CategoryHandlerImpl) ListCategories(c *gin.Context) {
-	result, err := h.categoryService.ListCategories(c.Request.Context())
+	var req dtos.ListCategoriesRequestDTO
+
+	if c.Request.Method == "GET" {
+		req.RootOnly = c.Query("root_only") == "true"
+
+		if parentIDStr := c.Query("parent_id"); parentIDStr != "" {
+			parentID, err := uuid.Parse(parentIDStr)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parent ID format"})
+				return
+			}
+			req.ParentID = &parentID
+		}
+	} else {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	schemaReq := &schema.ListCategoriesRequest{
+		ParentID: req.ParentID,
+		RootOnly: req.RootOnly,
+	}
+
+	result, err := h.categoryService.ListCategories(c.Request.Context(), schemaReq)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -168,6 +193,28 @@ func (h *CategoryHandlerImpl) GetCategoryChildren(c *gin.Context) {
 	response := &dtos.CategoryListResponseDTO{
 		Categories: categories,
 		Total:      result.Total,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+func (h *CategoryHandlerImpl) GetCategoryAverageProductPrice(c *gin.Context) {
+	categoryIDStr := c.Param("id")
+	categoryID, err := uuid.Parse(categoryIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
+		return
+	}
+
+	result, err := h.categoryService.GetCategoryAverageProductPrice(c.Request.Context(), categoryID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := &dtos.CategoryAverageProductPriceResponseDTO{
+		CategoryID:   result.CategoryID,
+		CategoryName: result.CategoryName,
+		AveragePrice: result.AveragePrice,
 	}
 
 	c.JSON(http.StatusOK, response)

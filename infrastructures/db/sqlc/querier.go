@@ -13,25 +13,20 @@ import (
 
 type Querier interface {
 	CountActiveProducts(ctx context.Context) (int64, error)
-	CountCategories(ctx context.Context) (int64, error)
 	CountCustomers(ctx context.Context) (int64, error)
 	CountOrderItems(ctx context.Context) (int64, error)
 	CountOrderItemsByOrder(ctx context.Context, orderID uuid.UUID) (int64, error)
 	CountOrders(ctx context.Context) (int64, error)
 	CountOrdersByStatus(ctx context.Context, status NullOrderStatus) (int64, error)
 	CountProducts(ctx context.Context) (int64, error)
-	CountRootCategories(ctx context.Context) (int64, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) (Customer, error)
 	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
 	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
-	CreateRootCategory(ctx context.Context, categoryName string) (Category, error)
 	GetCategory(ctx context.Context, categoryID uuid.UUID) (Category, error)
-	GetCategoryByName(ctx context.Context, categoryName string) (Category, error)
+	GetCategoryAverageProductPrice(ctx context.Context, categoryID uuid.UUID) (pgtype.Numeric, error)
 	GetCategoryChildren(ctx context.Context, parentID pgtype.UUID) ([]Category, error)
-	GetCategoryDescendants(ctx context.Context, categoryID uuid.UUID) ([]GetCategoryDescendantsRow, error)
-	GetCategoryPath(ctx context.Context, categoryID uuid.UUID) ([]GetCategoryPathRow, error)
 	GetCustomer(ctx context.Context, customerID uuid.UUID) (Customer, error)
 	GetCustomerByEmail(ctx context.Context, email string) (Customer, error)
 	GetCustomerByOpenIDSub(ctx context.Context, openidSub string) (Customer, error)
@@ -57,7 +52,6 @@ type Querier interface {
 	ListProducts(ctx context.Context) ([]Product, error)
 	ListProductsByCategory(ctx context.Context, categoryID uuid.UUID) ([]Product, error)
 	ListProductsInStock(ctx context.Context) ([]Product, error)
-	MoveCategoryToParent(ctx context.Context, arg MoveCategoryToParentParams) (Category, error)
 	SoftDeleteCategory(ctx context.Context, categoryID uuid.UUID) error
 	SoftDeleteCustomer(ctx context.Context, customerID uuid.UUID) error
 	SoftDeleteOrder(ctx context.Context, orderID uuid.UUID) error

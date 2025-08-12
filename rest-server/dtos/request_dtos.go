@@ -10,3 +10,8 @@ type CreateCategoryRequestDTO struct {
 type UpdateCategoryRequestDTO struct {
 	CategoryName string `json:"category_name" validate:"required,min=1,max=255"`
 }
+
+type ListCategoriesRequestDTO struct {
+	ParentID *uuid.UUID `json:"parent_id,omitempty" form:"parent_id"`
+	RootOnly bool       `json:"root_only,omitempty" form:"root_only"`
+}
