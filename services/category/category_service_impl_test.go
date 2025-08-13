@@ -794,3 +794,89 @@ func TestCategoryServiceImpl_GetCategoryAverageProductPrice(t *testing.T) {
 		})
 	}
 }
+
+func TestCategoryServiceImpl_DeleteCategory(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := repository.NewMockCategoryRepository(ctrl)
+	service := NewCategoryService(mockRepo)
+
+	ctx := context.Background()
+	categoryID := uuid.New()
+	now := time.Now()
+
+	tests := []struct {
+		name       string
+		categoryID uuid.UUID
+		setup      func()
+		wantErr    bool
+	}{
+		{
+			name:       "successful delete",
+			categoryID: categoryID,
+			setup: func() {
+				category := &entity.Category{
+					CategoryID:   categoryID,
+					CategoryName: "Electronics",
+					ParentID:     nil,
+					CreatedAt:    now,
+				}
+
+				mockRepo.EXPECT().
+					GetByID(ctx, categoryID).
+					Return(category, nil)
+
+				mockRepo.EXPECT().
+					SoftDelete(ctx, categoryID).
+					Return(nil)
+			},
+			wantErr: false,
+		},
+		{
+			name:       "category not found",
+			categoryID: categoryID,
+			setup: func() {
+				mockRepo.EXPECT().
+					GetByID(ctx, categoryID).
+					Return(nil, errors.New("category not found"))
+			},
+			wantErr: true,
+		},
+		{
+			name:       "delete operation fails",
+			categoryID: categoryID,
+			setup: func() {
+				category := &entity.Category{
+					CategoryID:   categoryID,
+					CategoryName: "Electronics",
+					ParentID:     nil,
+					CreatedAt:    now,
+				}
+
+				mockRepo.EXPECT().
+					GetByID(ctx, categoryID).
+					Return(category, nil)
+
+				mockRepo.EXPECT().
+					SoftDelete(ctx, categoryID).
+					Return(errors.New("database error"))
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setup()
+
+			err := service.DeleteCategory(ctx, tt.categoryID)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

@@ -12,6 +12,7 @@ func SetupCategoryRoutes(router *gin.Engine, categoryHandler handlers.CategoryHa
 		categories.GET("", categoryHandler.ListCategories)
 		categories.GET("/:id", categoryHandler.GetCategory)
 		categories.PUT("/:id", categoryHandler.UpdateCategory)
+		categories.DELETE("/:id", categoryHandler.DeleteCategory)
 		categories.GET("/:id/children", categoryHandler.GetCategoryChildren)
 		categories.GET("/:id/average-price", categoryHandler.GetCategoryAverageProductPrice)
 	}

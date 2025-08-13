@@ -9,9 +9,10 @@ import (
 type RestServer struct {
 	router          *gin.Engine
 	categoryHandler handlers.CategoryHandlerInterface
+	productHandler  handlers.ProductHandlerInterface
 }
 
-func NewRestServer(categoryHandler handlers.CategoryHandlerInterface) *RestServer {
+func NewRestServer(categoryHandler handlers.CategoryHandlerInterface, productHandler handlers.ProductHandlerInterface) *RestServer {
 	router := gin.New()
 
 	_ = router.SetTrustedProxies(nil)
@@ -22,6 +23,7 @@ func NewRestServer(categoryHandler handlers.CategoryHandlerInterface) *RestServe
 	server := &RestServer{
 		router:          router,
 		categoryHandler: categoryHandler,
+		productHandler:  productHandler,
 	}
 
 	server.setupRoutes()
@@ -30,6 +32,7 @@ func NewRestServer(categoryHandler handlers.CategoryHandlerInterface) *RestServe
 
 func (s *RestServer) setupRoutes() {
 	routes.SetupCategoryRoutes(s.router, s.categoryHandler)
+	routes.SetupProductRoutes(s.router, s.productHandler)
 }
 
 func (s *RestServer) Start(addr string) error {

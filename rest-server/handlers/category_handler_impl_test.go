@@ -836,3 +836,88 @@ func TestCategoryHandlerImpl_GetCategoryAverageProductPrice(t *testing.T) {
 		})
 	}
 }
+
+func TestCategoryHandlerImpl_DeleteCategory(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockService := service.NewMockCategoryService(ctrl)
+	handler := NewCategoryHandler(mockService)
+
+	categoryID := uuid.New()
+
+	tests := []struct {
+		name           string
+		categoryID     string
+		setup          func()
+		expectedStatus int
+		expectedBody   interface{}
+	}{
+		{
+			name:       "successful delete",
+			categoryID: categoryID.String(),
+			setup: func() {
+				mockService.EXPECT().
+					DeleteCategory(gomock.Any(), categoryID).
+					Return(nil)
+			},
+			expectedStatus: http.StatusNoContent,
+			expectedBody:   gin.H{},
+		},
+		{
+			name:           "invalid category ID format",
+			categoryID:     "invalid-uuid",
+			setup:          func() {},
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   gin.H{"error": "Invalid category ID"},
+		},
+		{
+			name:       "category not found",
+			categoryID: categoryID.String(),
+			setup: func() {
+				mockService.EXPECT().
+					DeleteCategory(gomock.Any(), categoryID).
+					Return(errors.New("category not found"))
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedBody:   gin.H{"error": "category not found"},
+		},
+		{
+			name:       "service error",
+			categoryID: categoryID.String(),
+			setup: func() {
+				mockService.EXPECT().
+					DeleteCategory(gomock.Any(), categoryID).
+					Return(errors.New("database error"))
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedBody:   gin.H{"error": "database error"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setup()
+
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request = httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/categories/%s", tt.categoryID), nil)
+			c.Params = []gin.Param{{Key: "id", Value: tt.categoryID}}
+
+			handler.(*CategoryHandlerImpl).DeleteCategory(c)
+
+			assert.Equal(t, tt.expectedStatus, w.Code)
+
+			if tt.expectedStatus == http.StatusNoContent {
+				assert.Empty(t, w.Body.String())
+			} else {
+				var response map[string]interface{}
+				json.Unmarshal(w.Body.Bytes(), &response)
+				expectedError := tt.expectedBody.(gin.H)
+				assert.Contains(t, response["error"], expectedError["error"])
+			}
+		})
+	}
+}

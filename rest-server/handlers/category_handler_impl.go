@@ -160,6 +160,22 @@ func (h *CategoryHandlerImpl) ListCategories(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *CategoryHandlerImpl) DeleteCategory(c *gin.Context) {
+	categoryIDStr := c.Param("id")
+	categoryID, err := uuid.Parse(categoryIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
+		return
+	}
+
+	if err := h.categoryService.DeleteCategory(c.Request.Context(), categoryID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{})
+}
+
 func (h *CategoryHandlerImpl) GetCategoryChildren(c *gin.Context) {
 	categoryIDStr := c.Param("id")
 

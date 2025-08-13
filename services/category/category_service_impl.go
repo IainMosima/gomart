@@ -106,6 +106,15 @@ func (s *CategoryServiceImpl) GetCategoryChildren(ctx context.Context, parentID 
 	}, nil
 }
 
+func (s *CategoryServiceImpl) DeleteCategory(ctx context.Context, categoryID uuid.UUID) error {
+	_, err := s.categoryRepo.GetByID(ctx, categoryID)
+	if err != nil {
+		return err
+	}
+
+	return s.categoryRepo.SoftDelete(ctx, categoryID)
+}
+
 func (s *CategoryServiceImpl) GetCategoryAverageProductPrice(ctx context.Context, categoryID uuid.UUID) (*schema.CategoryAverageProductPriceResponse, error) {
 	category, err := s.categoryRepo.GetByID(ctx, categoryID)
 	if err != nil {

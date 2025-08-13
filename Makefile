@@ -1,5 +1,5 @@
 postgres:
-	docker run --name postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=supersecret -d postgres:14-alpine
+	docker run --name gomart-postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=supersecret -d postgres:14-alpine
 
 createdb:
 	psql postgres://root:supersecret@localhost:5432/postgres -c "CREATE DATABASE gomart_db;"
@@ -40,4 +40,16 @@ test-category-coverage:
 clean-coverage:
 	rm -f coverage.out coverage.html
 
-.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen test test-coverage test-coverage-html test-category test-category-coverage clean-coverage
+seed-categories:
+	psql postgres://root:supersecret@localhost:5432/gomart_db -f seed_categories.sql
+
+seed-products:
+	psql postgres://root:supersecret@localhost:5432/gomart_db -f seed_products.sql
+
+seed: seed-categories seed-products
+	@echo "Seed data loaded successfully!"
+
+seed-verify:
+	psql postgres://root:supersecret@localhost:5432/gomart_db -c "SELECT 'Categories' as type, COUNT(*)::text as count FROM categories WHERE is_deleted = FALSE UNION ALL SELECT 'Products' as type, COUNT(*)::text as count FROM products WHERE is_deleted = FALSE UNION ALL SELECT 'Price Range' as type, CONCAT('KES ', MIN(price), ' - ', MAX(price)) as count FROM products WHERE is_deleted = FALSE;"
+
+.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed seed-verify

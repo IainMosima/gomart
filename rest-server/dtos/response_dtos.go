@@ -24,3 +24,32 @@ type CategoryAverageProductPriceResponseDTO struct {
 	CategoryName string    `json:"category_name"`
 	AveragePrice float64   `json:"average_price"`
 }
+
+type ProductResponseDTO struct {
+	ProductID     uuid.UUID  `json:"product_id"`
+	ProductName   string     `json:"product_name"`
+	Description   *string    `json:"description,omitempty"`
+	Price         float64    `json:"price"`
+	SKU           string     `json:"sku"`
+	StockQuantity int32      `json:"stock_quantity"`
+	CategoryID    uuid.UUID  `json:"category_id"`
+	IsActive      bool       `json:"is_active"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     *time.Time `json:"updated_at,omitempty"`
+}
+
+type ProductListResponseDTO struct {
+	Products []*ProductResponseDTO `json:"products"`
+	Total    int64                 `json:"total"`
+	Page     int                   `json:"page"`
+	Limit    int                   `json:"limit"`
+	HasNext  bool                  `json:"has_next"`
+}
+
+type StockUpdateResponseDTO struct {
+	ProductID   uuid.UUID `json:"product_id"`
+	SKU         string    `json:"sku"`
+	OldQuantity int32     `json:"old_quantity"`
+	NewQuantity int32     `json:"new_quantity"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
