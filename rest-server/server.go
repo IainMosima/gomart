@@ -1,18 +1,21 @@
 package rest_server
 
 import (
-	"github.com/IainMosima/gomart/rest-server/handlers"
+	"github.com/IainMosima/gomart/rest-server/handlers/auth"
+	"github.com/IainMosima/gomart/rest-server/handlers/category"
+	"github.com/IainMosima/gomart/rest-server/handlers/product"
 	"github.com/IainMosima/gomart/rest-server/routes"
 	"github.com/gin-gonic/gin"
 )
 
 type RestServer struct {
 	router          *gin.Engine
-	categoryHandler handlers.CategoryHandlerInterface
-	productHandler  handlers.ProductHandlerInterface
+	categoryHandler category.CategoryHandlerInterface
+	productHandler  product.ProductHandlerInterface
+	authHandler     auth.AuthHandler
 }
 
-func NewRestServer(categoryHandler handlers.CategoryHandlerInterface, productHandler handlers.ProductHandlerInterface) *RestServer {
+func NewRestServer(categoryHandler category.CategoryHandlerInterface, productHandler product.ProductHandlerInterface, authHandler auth.AuthHandler) *RestServer {
 	router := gin.New()
 
 	_ = router.SetTrustedProxies(nil)
@@ -24,6 +27,7 @@ func NewRestServer(categoryHandler handlers.CategoryHandlerInterface, productHan
 		router:          router,
 		categoryHandler: categoryHandler,
 		productHandler:  productHandler,
+		authHandler:     authHandler,
 	}
 
 	server.setupRoutes()
@@ -33,6 +37,7 @@ func NewRestServer(categoryHandler handlers.CategoryHandlerInterface, productHan
 func (s *RestServer) setupRoutes() {
 	routes.SetupCategoryRoutes(s.router, s.categoryHandler)
 	routes.SetupProductRoutes(s.router, s.productHandler)
+	routes.SetupAuthRoutes(s.router, s.authHandler)
 }
 
 func (s *RestServer) Start(addr string) error {

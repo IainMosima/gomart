@@ -53,3 +53,9 @@ type StockUpdateResponseDTO struct {
 	NewQuantity int32     `json:"new_quantity"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+type LoginResponseDTO struct {
+	LoginUrl string `json:"login_url"`
+	State    string `json:"state"`
+	Message  string `json:"message"`
+}

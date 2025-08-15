@@ -3,6 +3,8 @@ package auth
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/url"
 
 	"github.com/IainMosima/gomart/configs"
 	"github.com/IainMosima/gomart/domains/auth/schema"
@@ -41,7 +43,7 @@ func NewCognitoService(cfg *configs.Config) (*CognitoService, error) {
 		ClientSecret: cfg.CognitoClientSecret,
 		RedirectURL:  cfg.CognitoRedirectURI,
 		Endpoint:     oidcProvider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "email", "phone", "profile", "offline_access"},
+		Scopes:       []string{oidc.ScopeOpenID, "email", "phone"},
 	}
 
 	return &CognitoService{
@@ -50,6 +52,39 @@ func NewCognitoService(cfg *configs.Config) (*CognitoService, error) {
 		oidcProvider: oidcProvider,
 		oauth2Config: oauth2Config,
 	}, nil
+}
+
+func (c *CognitoService) GetAuthURL(state string) (string, error) {
+	baseURL := fmt.Sprintf("https://%s/login", c.config.CognitoDomain)
+
+	authURL := fmt.Sprintf("%s?client_id=%s&response_type=code&scope=email+openid+phone&redirect_uri=%s",
+		baseURL,
+		c.config.CognitoClientID,
+		url.QueryEscape(c.config.CognitoRedirectURI))
+
+	if state != "" {
+		authURL += "&state=" + url.QueryEscape(state)
+	}
+
+	log.Printf("Generated Cognito auth URL: %s", authURL)
+
+	return authURL, nil
+}
+
+func (c *CognitoService) ParseIDToken(ctx context.Context, idToken string) (*schema.CognitoUserInfoJWTClaims, error) {
+	verifier := c.oidcProvider.Verifier(&oidc.Config{ClientID: c.config.CognitoClientID})
+
+	token, err := verifier.Verify(ctx, idToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify token: %w", err)
+	}
+
+	var claims schema.CognitoUserInfoJWTClaims
+	if err := token.Claims(&claims); err != nil {
+		return nil, fmt.Errorf("failed to extract claims: %w", err)
+	}
+
+	return &claims, nil
 }
 
 func (c *CognitoService) ExchangeCodeForTokens(ctx context.Context, code string) (*schema.TokenResponse, error) {

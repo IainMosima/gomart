@@ -7,7 +7,6 @@ import (
 	"github.com/IainMosima/gomart/configs"
 	"github.com/IainMosima/gomart/domains/auth/schema"
 	"github.com/IainMosima/gomart/domains/auth/service"
-	"github.com/google/uuid"
 )
 
 type AuthServiceImpl struct {
@@ -25,22 +24,26 @@ func NewAuthServiceImpl(cfg *configs.Config) (service.AuthService, error) {
 	}, nil
 }
 
-func (a *AuthServiceImpl) GenerateAuthURL(req *schema.LoginRequest) (*schema.LoginResponse, error) {
-	state := req.State
-	if state == "" {
-		state = uuid.New().String()
+func (a *AuthServiceImpl) GetAuthURL(state string) (string, error) {
+	url, err := a.cognitoService.GetAuthURL(state)
+	if err != nil {
+		return "", fmt.Errorf("failed to get auth url: %w", err)
 	}
-
-	authURL := a.cognitoService.oauth2Config.AuthCodeURL(state)
-
-	return &schema.LoginResponse{
-		AuthURL: authURL,
-		State:   state,
-	}, nil
+	return url, nil
 }
 
-func (a *AuthServiceImpl) ExchangeCodeForToken(ctx context.Context, req *schema.TokenExchangeRequest) (*schema.TokenResponse, error) {
-	return a.cognitoService.ExchangeCodeForTokens(ctx, req.Code)
+func (a *AuthServiceImpl) HandleCallback(ctx context.Context, req *schema.HandleCallbackRequest) (*schema.TokenResponse, error) {
+	if req.Code == nil {
+		return nil, fmt.Errorf("code is required")
+	}
+
+	tokenResp, err := a.cognitoService.ExchangeCodeForTokens(ctx, *req.Code)
+	if err != nil {
+		return nil, fmt.Errorf("failed to exchange code for tokens: %w", err)
+	}
+
+	return tokenResp, nil
+
 }
 
 func (a *AuthServiceImpl) RefreshAccessToken(ctx context.Context, req *schema.RefreshTokenRequest) (*schema.RefreshTokenResponse, error) {

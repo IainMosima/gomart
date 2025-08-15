@@ -3,6 +3,7 @@ package schema
 import (
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
 
@@ -57,9 +58,9 @@ type CognitoTokenResponse struct {
 	IDToken      string `json:"id_token"`
 }
 
-type CognitoUserInfo struct {
+type CognitoUserInfoJWTClaims struct {
 	Sub                 string `json:"sub"`
-	Username            string `json:"username"`
+	CognitoUsername     string `json:"cognito:username"`
 	Email               string `json:"email"`
 	EmailVerified       bool   `json:"email_verified"`
 	PhoneNumber         string `json:"phone_number,omitempty"`
@@ -67,4 +68,5 @@ type CognitoUserInfo struct {
 	GivenName           string `json:"given_name,omitempty"`
 	FamilyName          string `json:"family_name,omitempty"`
 	Name                string `json:"name,omitempty"`
+	jwt.RegisteredClaims
 }
