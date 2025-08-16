@@ -9,9 +9,9 @@ import (
 	"github.com/IainMosima/gomart/domains/category/entity"
 	"github.com/IainMosima/gomart/domains/category/repository"
 	"github.com/IainMosima/gomart/domains/category/schema"
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/mock/gomock"
 )
 
 func TestNewCategoryService(t *testing.T) {

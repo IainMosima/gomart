@@ -12,30 +12,26 @@ import (
 )
 
 type Querier interface {
-	CountActiveProducts(ctx context.Context) (int64, error)
-	CountProducts(ctx context.Context) (int64, error)
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error)
 	CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error)
 	CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (Customer, error)
+	DeleteProduct(ctx context.Context, productID uuid.UUID) error
 	GetCategory(ctx context.Context, categoryID uuid.UUID) (Category, error)
 	GetCategoryAverageProductPrice(ctx context.Context, categoryID uuid.UUID) (pgtype.Numeric, error)
 	GetCategoryChildren(ctx context.Context, parentID pgtype.UUID) ([]Category, error)
 	GetOrder(ctx context.Context, orderID uuid.UUID) (Order, error)
 	GetProduct(ctx context.Context, productID uuid.UUID) (Product, error)
-	GetProductBySKU(ctx context.Context, sku string) (Product, error)
+	GetProductsByCategory(ctx context.Context, categoryID uuid.UUID) ([]Product, error)
 	GetRootCategories(ctx context.Context) ([]Category, error)
-	ListActiveProducts(ctx context.Context) ([]Product, error)
+	GetUser(ctx context.Context, userID uuid.UUID) (Customer, error)
+	GetUserByEmail(ctx context.Context, email string) (Customer, error)
 	ListCategories(ctx context.Context) ([]Category, error)
 	ListProducts(ctx context.Context) ([]Product, error)
-	ListProductsByCategory(ctx context.Context, categoryID uuid.UUID) ([]Product, error)
-	ListProductsInStock(ctx context.Context) ([]Product, error)
 	SoftDeleteCategory(ctx context.Context, categoryID uuid.UUID) error
-	SoftDeleteProduct(ctx context.Context, productID uuid.UUID) error
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
-	UpdateProductStatus(ctx context.Context, arg UpdateProductStatusParams) (Product, error)
-	UpdateProductStock(ctx context.Context, arg UpdateProductStockParams) (Product, error)
 }
 
 var _ Querier = (*Queries)(nil)

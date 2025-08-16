@@ -11,9 +11,9 @@ import (
 	"github.com/IainMosima/gomart/domains/product/entity"
 	"github.com/IainMosima/gomart/domains/product/repository"
 	"github.com/IainMosima/gomart/domains/product/schema"
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/mock/gomock"
 )
 
 func TestNewProductService(t *testing.T) {
@@ -384,7 +384,7 @@ func TestProductServiceImpl_DeleteProduct(t *testing.T) {
 					}, nil)
 
 				mockProductRepo.EXPECT().
-					SoftDelete(ctx, productID).
+					Delete(ctx, productID).
 					Return(nil)
 			},
 			wantErr: false,
@@ -523,7 +523,7 @@ func TestProductServiceImpl_ListProducts(t *testing.T) {
 			},
 			setup: func() {
 				mockProductRepo.EXPECT().
-					GetActiveProducts(ctx).
+					GetAll(ctx).
 					Return(products, nil)
 			},
 			want: &schema.ProductListResponse{

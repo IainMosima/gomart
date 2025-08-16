@@ -18,6 +18,13 @@ type Category struct {
 	IsDeleted    pgtype.Bool        `json:"is_deleted"`
 }
 
+type Customer struct {
+	UserID      uuid.UUID `json:"user_id"`
+	PhoneNumber string    `json:"phone_number"`
+	UserName    string    `json:"user_name"`
+	Email       string    `json:"email"`
+}
+
 type Order struct {
 	OrderID     uuid.UUID          `json:"order_id"`
 	CustomerID  uuid.UUID          `json:"customer_id"`

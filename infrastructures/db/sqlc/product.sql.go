@@ -12,28 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countActiveProducts = `-- name: CountActiveProducts :one
-SELECT COUNT(*) FROM products WHERE is_active = true AND is_deleted = FALSE
-`
-
-func (q *Queries) CountActiveProducts(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countActiveProducts)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const countProducts = `-- name: CountProducts :one
-SELECT COUNT(*) FROM products WHERE is_deleted = FALSE
-`
-
-func (q *Queries) CountProducts(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countProducts)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO products (product_name, description, price, sku, stock_quantity, category_id, is_active)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -77,6 +55,17 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
+const deleteProduct = `-- name: DeleteProduct :exec
+UPDATE products
+SET is_deleted = TRUE, updated_at = NOW()
+WHERE product_id = $1 AND is_deleted = FALSE
+`
+
+func (q *Queries) DeleteProduct(ctx context.Context, productID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteProduct, productID)
+	return err
+}
+
 const getProduct = `-- name: GetProduct :one
 SELECT product_id, product_name, description, price, sku, stock_quantity, category_id, is_active, created_at, updated_at, is_deleted
 FROM products
@@ -102,40 +91,15 @@ func (q *Queries) GetProduct(ctx context.Context, productID uuid.UUID) (Product,
 	return i, err
 }
 
-const getProductBySKU = `-- name: GetProductBySKU :one
+const getProductsByCategory = `-- name: GetProductsByCategory :many
 SELECT product_id, product_name, description, price, sku, stock_quantity, category_id, is_active, created_at, updated_at, is_deleted
 FROM products
-WHERE sku = $1 AND is_deleted = FALSE
-`
-
-func (q *Queries) GetProductBySKU(ctx context.Context, sku string) (Product, error) {
-	row := q.db.QueryRow(ctx, getProductBySKU, sku)
-	var i Product
-	err := row.Scan(
-		&i.ProductID,
-		&i.ProductName,
-		&i.Description,
-		&i.Price,
-		&i.Sku,
-		&i.StockQuantity,
-		&i.CategoryID,
-		&i.IsActive,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
-}
-
-const listActiveProducts = `-- name: ListActiveProducts :many
-SELECT product_id, product_name, description, price, sku, stock_quantity, category_id, is_active, created_at, updated_at, is_deleted
-FROM products
-WHERE is_active = true AND is_deleted = FALSE
+WHERE category_id = $1 AND is_deleted = FALSE
 ORDER BY product_name ASC
 `
 
-func (q *Queries) ListActiveProducts(ctx context.Context) ([]Product, error) {
-	rows, err := q.db.Query(ctx, listActiveProducts)
+func (q *Queries) GetProductsByCategory(ctx context.Context, categoryID uuid.UUID) ([]Product, error) {
+	rows, err := q.db.Query(ctx, getProductsByCategory, categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -205,95 +169,6 @@ func (q *Queries) ListProducts(ctx context.Context) ([]Product, error) {
 	return items, nil
 }
 
-const listProductsByCategory = `-- name: ListProductsByCategory :many
-SELECT product_id, product_name, description, price, sku, stock_quantity, category_id, is_active, created_at, updated_at, is_deleted
-FROM products
-WHERE category_id = $1 AND is_deleted = FALSE
-ORDER BY product_name ASC
-`
-
-func (q *Queries) ListProductsByCategory(ctx context.Context, categoryID uuid.UUID) ([]Product, error) {
-	rows, err := q.db.Query(ctx, listProductsByCategory, categoryID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Product{}
-	for rows.Next() {
-		var i Product
-		if err := rows.Scan(
-			&i.ProductID,
-			&i.ProductName,
-			&i.Description,
-			&i.Price,
-			&i.Sku,
-			&i.StockQuantity,
-			&i.CategoryID,
-			&i.IsActive,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsDeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listProductsInStock = `-- name: ListProductsInStock :many
-SELECT product_id, product_name, description, price, sku, stock_quantity, category_id, is_active, created_at, updated_at, is_deleted
-FROM products
-WHERE stock_quantity > 0 AND is_deleted = FALSE
-ORDER BY product_name ASC
-`
-
-func (q *Queries) ListProductsInStock(ctx context.Context) ([]Product, error) {
-	rows, err := q.db.Query(ctx, listProductsInStock)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Product{}
-	for rows.Next() {
-		var i Product
-		if err := rows.Scan(
-			&i.ProductID,
-			&i.ProductName,
-			&i.Description,
-			&i.Price,
-			&i.Sku,
-			&i.StockQuantity,
-			&i.CategoryID,
-			&i.IsActive,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsDeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const softDeleteProduct = `-- name: SoftDeleteProduct :exec
-UPDATE products
-SET is_deleted = TRUE, updated_at = NOW()
-WHERE product_id = $1 AND is_deleted = FALSE
-`
-
-func (q *Queries) SoftDeleteProduct(ctx context.Context, productID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, softDeleteProduct, productID)
-	return err
-}
-
 const updateProduct = `-- name: UpdateProduct :one
 UPDATE products
 SET product_name = $2, description = $3, price = $4, stock_quantity = $5, category_id = $6, is_active = $7, updated_at = NOW()
@@ -321,68 +196,6 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		arg.CategoryID,
 		arg.IsActive,
 	)
-	var i Product
-	err := row.Scan(
-		&i.ProductID,
-		&i.ProductName,
-		&i.Description,
-		&i.Price,
-		&i.Sku,
-		&i.StockQuantity,
-		&i.CategoryID,
-		&i.IsActive,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
-}
-
-const updateProductStatus = `-- name: UpdateProductStatus :one
-UPDATE products
-SET is_active = $2, updated_at = NOW()
-WHERE product_id = $1 AND is_deleted = FALSE
-RETURNING product_id, product_name, description, price, sku, stock_quantity, category_id, is_active, created_at, updated_at, is_deleted
-`
-
-type UpdateProductStatusParams struct {
-	ProductID uuid.UUID   `json:"product_id"`
-	IsActive  pgtype.Bool `json:"is_active"`
-}
-
-func (q *Queries) UpdateProductStatus(ctx context.Context, arg UpdateProductStatusParams) (Product, error) {
-	row := q.db.QueryRow(ctx, updateProductStatus, arg.ProductID, arg.IsActive)
-	var i Product
-	err := row.Scan(
-		&i.ProductID,
-		&i.ProductName,
-		&i.Description,
-		&i.Price,
-		&i.Sku,
-		&i.StockQuantity,
-		&i.CategoryID,
-		&i.IsActive,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
-}
-
-const updateProductStock = `-- name: UpdateProductStock :one
-UPDATE products
-SET stock_quantity = $2, updated_at = NOW()
-WHERE product_id = $1 AND is_deleted = FALSE
-RETURNING product_id, product_name, description, price, sku, stock_quantity, category_id, is_active, created_at, updated_at, is_deleted
-`
-
-type UpdateProductStockParams struct {
-	ProductID     uuid.UUID `json:"product_id"`
-	StockQuantity int32     `json:"stock_quantity"`
-}
-
-func (q *Queries) UpdateProductStock(ctx context.Context, arg UpdateProductStockParams) (Product, error) {
-	row := q.db.QueryRow(ctx, updateProductStock, arg.ProductID, arg.StockQuantity)
 	var i Product
 	err := row.Scan(
 		&i.ProductID,

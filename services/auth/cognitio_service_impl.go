@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/coreos/go-oidc"
+	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 )
 
@@ -145,8 +146,10 @@ func (c *CognitoService) ValidateAccessToken(ctx context.Context, accessToken st
 	if err := json.Unmarshal(body, &userInfoClaims); err != nil {
 		return nil, fmt.Errorf("failed to parse userInfo response: %w", err)
 	}
+	userID, _ := uuid.Parse(userInfoClaims.Sub)
 
 	userInfo := &schema.UserInfoResponse{
+		UserID:        userID,
 		UserName:      userInfoClaims.Username,
 		Email:         userInfoClaims.Email,
 		EmailVerified: userInfoClaims.EmailVerified == "true",

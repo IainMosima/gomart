@@ -9,8 +9,8 @@ import (
 	reflect "reflect"
 
 	entity "github.com/IainMosima/gomart/domains/category/entity"
+	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
-	gomock "go.uber.org/mock/gomock"
 )
 
 // MockCategoryRepository is a mock of CategoryRepository interface.
