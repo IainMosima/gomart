@@ -115,7 +115,7 @@ func (s *ProductServiceImpl) DeleteProduct(ctx context.Context, productID uuid.U
 		return err
 	}
 
-	return s.productRepo.SoftDelete(ctx, productID)
+	return s.productRepo.Delete(ctx, productID)
 }
 
 func (s *ProductServiceImpl) ListProducts(ctx context.Context, req *schema.ProductSearchRequest) (*schema.ProductListResponse, error) {
@@ -124,10 +124,6 @@ func (s *ProductServiceImpl) ListProducts(ctx context.Context, req *schema.Produ
 
 	if req != nil && req.CategoryID != nil {
 		products, err = s.productRepo.GetByCategory(ctx, *req.CategoryID)
-	} else if req != nil && req.IsActive != nil && *req.IsActive {
-		products, err = s.productRepo.GetActiveProducts(ctx)
-	} else if req != nil && req.InStock != nil && *req.InStock {
-		products, err = s.productRepo.GetInStock(ctx)
 	} else {
 		products, err = s.productRepo.GetAll(ctx)
 	}

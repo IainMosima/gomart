@@ -39,10 +39,11 @@ type RefreshTokenResponse struct {
 }
 
 type UserInfoResponse struct {
-	UserName      string `json:"user_name"`
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-	PhoneNumber   string `json:"phone_number"`
+	UserID        uuid.UUID `json:"user_id"`
+	UserName      string    `json:"user_name"`
+	Email         string    `json:"email"`
+	EmailVerified bool      `json:"email_verified"`
+	PhoneNumber   string    `json:"phone_number"`
 }
 
 type LogoutResponse struct {

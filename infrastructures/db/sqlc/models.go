@@ -5,58 +5,9 @@
 package db
 
 import (
-	"database/sql/driver"
-	"fmt"
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-type OrderStatus string
-
-const (
-	OrderStatusPending    OrderStatus = "pending"
-	OrderStatusConfirmed  OrderStatus = "confirmed"
-	OrderStatusProcessing OrderStatus = "processing"
-	OrderStatusShipped    OrderStatus = "shipped"
-	OrderStatusDelivered  OrderStatus = "delivered"
-	OrderStatusCancelled  OrderStatus = "cancelled"
-)
-
-func (e *OrderStatus) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = OrderStatus(s)
-	case string:
-		*e = OrderStatus(s)
-	default:
-		return fmt.Errorf("unsupported scan type for OrderStatus: %T", src)
-	}
-	return nil
-}
-
-type NullOrderStatus struct {
-	OrderStatus OrderStatus `json:"order_status"`
-	Valid       bool        `json:"valid"` // Valid is true if OrderStatus is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullOrderStatus) Scan(value interface{}) error {
-	if value == nil {
-		ns.OrderStatus, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.OrderStatus.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullOrderStatus) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.OrderStatus), nil
-}
 
 type Category struct {
 	CategoryID   uuid.UUID          `json:"category_id"`
@@ -68,33 +19,21 @@ type Category struct {
 }
 
 type Customer struct {
-	CustomerID     uuid.UUID          `json:"customer_id"`
-	Email          string             `json:"email"`
-	FirstName      string             `json:"first_name"`
-	LastName       string             `json:"last_name"`
-	Phone          pgtype.Text        `json:"phone"`
-	Address        pgtype.Text        `json:"address"`
-	City           pgtype.Text        `json:"city"`
-	PostalCode     pgtype.Text        `json:"postal_code"`
-	OpenidSub      string             `json:"openid_sub"`
-	SetupCompleted pgtype.Bool        `json:"setup_completed"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	IsDeleted      pgtype.Bool        `json:"is_deleted"`
+	UserID      uuid.UUID `json:"user_id"`
+	PhoneNumber string    `json:"phone_number"`
+	UserName    string    `json:"user_name"`
+	Email       string    `json:"email"`
 }
 
 type Order struct {
-	OrderID         uuid.UUID          `json:"order_id"`
-	CustomerID      uuid.UUID          `json:"customer_id"`
-	OrderNumber     string             `json:"order_number"`
-	Status          NullOrderStatus    `json:"status"`
-	TotalAmount     pgtype.Numeric     `json:"total_amount"`
-	ShippingAddress string             `json:"shipping_address"`
-	BillingAddress  string             `json:"billing_address"`
-	Notes           pgtype.Text        `json:"notes"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-	IsDeleted       pgtype.Bool        `json:"is_deleted"`
+	OrderID     uuid.UUID          `json:"order_id"`
+	CustomerID  uuid.UUID          `json:"customer_id"`
+	OrderNumber string             `json:"order_number"`
+	Status      pgtype.Text        `json:"status"`
+	TotalAmount pgtype.Numeric     `json:"total_amount"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	IsDeleted   pgtype.Bool        `json:"is_deleted"`
 }
 
 type OrderItem struct {

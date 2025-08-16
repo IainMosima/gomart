@@ -12,42 +12,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countOrders = `-- name: CountOrders :one
-SELECT COUNT(*) FROM orders WHERE is_deleted = FALSE
-`
-
-func (q *Queries) CountOrders(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countOrders)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const countOrdersByStatus = `-- name: CountOrdersByStatus :one
-SELECT COUNT(*) FROM orders WHERE status = $1 AND is_deleted = FALSE
-`
-
-func (q *Queries) CountOrdersByStatus(ctx context.Context, status NullOrderStatus) (int64, error) {
-	row := q.db.QueryRow(ctx, countOrdersByStatus, status)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const createOrder = `-- name: CreateOrder :one
-INSERT INTO orders (customer_id, order_number, status, total_amount, shipping_address, billing_address, notes)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
+INSERT INTO orders (customer_id, order_number, status, total_amount)
+VALUES ($1, $2, $3, $4)
+RETURNING order_id, customer_id, order_number, status, total_amount, created_at, updated_at, is_deleted
 `
 
 type CreateOrderParams struct {
-	CustomerID      uuid.UUID       `json:"customer_id"`
-	OrderNumber     string          `json:"order_number"`
-	Status          NullOrderStatus `json:"status"`
-	TotalAmount     pgtype.Numeric  `json:"total_amount"`
-	ShippingAddress string          `json:"shipping_address"`
-	BillingAddress  string          `json:"billing_address"`
-	Notes           pgtype.Text     `json:"notes"`
+	CustomerID  uuid.UUID      `json:"customer_id"`
+	OrderNumber string         `json:"order_number"`
+	Status      pgtype.Text    `json:"status"`
+	TotalAmount pgtype.Numeric `json:"total_amount"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
@@ -56,9 +31,6 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		arg.OrderNumber,
 		arg.Status,
 		arg.TotalAmount,
-		arg.ShippingAddress,
-		arg.BillingAddress,
-		arg.Notes,
 	)
 	var i Order
 	err := row.Scan(
@@ -67,9 +39,6 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.OrderNumber,
 		&i.Status,
 		&i.TotalAmount,
-		&i.ShippingAddress,
-		&i.BillingAddress,
-		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.IsDeleted,
@@ -78,7 +47,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 }
 
 const getOrder = `-- name: GetOrder :one
-SELECT order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
+SELECT order_id, customer_id, order_number, status, total_amount, created_at, updated_at, is_deleted
 FROM orders
 WHERE order_id = $1 AND is_deleted = FALSE
 `
@@ -92,310 +61,6 @@ func (q *Queries) GetOrder(ctx context.Context, orderID uuid.UUID) (Order, error
 		&i.OrderNumber,
 		&i.Status,
 		&i.TotalAmount,
-		&i.ShippingAddress,
-		&i.BillingAddress,
-		&i.Notes,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
-}
-
-const getOrderByNumber = `-- name: GetOrderByNumber :one
-SELECT order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
-FROM orders
-WHERE order_number = $1 AND is_deleted = FALSE
-`
-
-func (q *Queries) GetOrderByNumber(ctx context.Context, orderNumber string) (Order, error) {
-	row := q.db.QueryRow(ctx, getOrderByNumber, orderNumber)
-	var i Order
-	err := row.Scan(
-		&i.OrderID,
-		&i.CustomerID,
-		&i.OrderNumber,
-		&i.Status,
-		&i.TotalAmount,
-		&i.ShippingAddress,
-		&i.BillingAddress,
-		&i.Notes,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
-}
-
-const listOrders = `-- name: ListOrders :many
-SELECT order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
-FROM orders
-WHERE is_deleted = FALSE
-ORDER BY created_at DESC
-`
-
-func (q *Queries) ListOrders(ctx context.Context) ([]Order, error) {
-	rows, err := q.db.Query(ctx, listOrders)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Order{}
-	for rows.Next() {
-		var i Order
-		if err := rows.Scan(
-			&i.OrderID,
-			&i.CustomerID,
-			&i.OrderNumber,
-			&i.Status,
-			&i.TotalAmount,
-			&i.ShippingAddress,
-			&i.BillingAddress,
-			&i.Notes,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsDeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listOrdersByCustomer = `-- name: ListOrdersByCustomer :many
-SELECT order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
-FROM orders
-WHERE customer_id = $1 AND is_deleted = FALSE
-ORDER BY created_at DESC
-`
-
-func (q *Queries) ListOrdersByCustomer(ctx context.Context, customerID uuid.UUID) ([]Order, error) {
-	rows, err := q.db.Query(ctx, listOrdersByCustomer, customerID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Order{}
-	for rows.Next() {
-		var i Order
-		if err := rows.Scan(
-			&i.OrderID,
-			&i.CustomerID,
-			&i.OrderNumber,
-			&i.Status,
-			&i.TotalAmount,
-			&i.ShippingAddress,
-			&i.BillingAddress,
-			&i.Notes,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsDeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listOrdersByDateRange = `-- name: ListOrdersByDateRange :many
-SELECT order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
-FROM orders
-WHERE created_at >= $1 AND created_at <= $2 AND is_deleted = FALSE
-ORDER BY created_at DESC
-`
-
-type ListOrdersByDateRangeParams struct {
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	CreatedAt_2 pgtype.Timestamptz `json:"created_at_2"`
-}
-
-func (q *Queries) ListOrdersByDateRange(ctx context.Context, arg ListOrdersByDateRangeParams) ([]Order, error) {
-	rows, err := q.db.Query(ctx, listOrdersByDateRange, arg.CreatedAt, arg.CreatedAt_2)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Order{}
-	for rows.Next() {
-		var i Order
-		if err := rows.Scan(
-			&i.OrderID,
-			&i.CustomerID,
-			&i.OrderNumber,
-			&i.Status,
-			&i.TotalAmount,
-			&i.ShippingAddress,
-			&i.BillingAddress,
-			&i.Notes,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsDeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listOrdersByStatus = `-- name: ListOrdersByStatus :many
-SELECT order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
-FROM orders
-WHERE status = $1 AND is_deleted = FALSE
-ORDER BY created_at DESC
-`
-
-func (q *Queries) ListOrdersByStatus(ctx context.Context, status NullOrderStatus) ([]Order, error) {
-	rows, err := q.db.Query(ctx, listOrdersByStatus, status)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Order{}
-	for rows.Next() {
-		var i Order
-		if err := rows.Scan(
-			&i.OrderID,
-			&i.CustomerID,
-			&i.OrderNumber,
-			&i.Status,
-			&i.TotalAmount,
-			&i.ShippingAddress,
-			&i.BillingAddress,
-			&i.Notes,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsDeleted,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const softDeleteOrder = `-- name: SoftDeleteOrder :exec
-UPDATE orders
-SET is_deleted = TRUE, updated_at = NOW()
-WHERE order_id = $1 AND is_deleted = FALSE
-`
-
-func (q *Queries) SoftDeleteOrder(ctx context.Context, orderID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, softDeleteOrder, orderID)
-	return err
-}
-
-const updateOrder = `-- name: UpdateOrder :one
-UPDATE orders
-SET status = $2, total_amount = $3, shipping_address = $4, billing_address = $5, notes = $6, updated_at = NOW()
-WHERE order_id = $1 AND is_deleted = FALSE
-RETURNING order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
-`
-
-type UpdateOrderParams struct {
-	OrderID         uuid.UUID       `json:"order_id"`
-	Status          NullOrderStatus `json:"status"`
-	TotalAmount     pgtype.Numeric  `json:"total_amount"`
-	ShippingAddress string          `json:"shipping_address"`
-	BillingAddress  string          `json:"billing_address"`
-	Notes           pgtype.Text     `json:"notes"`
-}
-
-func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) (Order, error) {
-	row := q.db.QueryRow(ctx, updateOrder,
-		arg.OrderID,
-		arg.Status,
-		arg.TotalAmount,
-		arg.ShippingAddress,
-		arg.BillingAddress,
-		arg.Notes,
-	)
-	var i Order
-	err := row.Scan(
-		&i.OrderID,
-		&i.CustomerID,
-		&i.OrderNumber,
-		&i.Status,
-		&i.TotalAmount,
-		&i.ShippingAddress,
-		&i.BillingAddress,
-		&i.Notes,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
-}
-
-const updateOrderStatus = `-- name: UpdateOrderStatus :one
-UPDATE orders
-SET status = $2, updated_at = NOW()
-WHERE order_id = $1 AND is_deleted = FALSE
-RETURNING order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
-`
-
-type UpdateOrderStatusParams struct {
-	OrderID uuid.UUID       `json:"order_id"`
-	Status  NullOrderStatus `json:"status"`
-}
-
-func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) (Order, error) {
-	row := q.db.QueryRow(ctx, updateOrderStatus, arg.OrderID, arg.Status)
-	var i Order
-	err := row.Scan(
-		&i.OrderID,
-		&i.CustomerID,
-		&i.OrderNumber,
-		&i.Status,
-		&i.TotalAmount,
-		&i.ShippingAddress,
-		&i.BillingAddress,
-		&i.Notes,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsDeleted,
-	)
-	return i, err
-}
-
-const updateOrderTotal = `-- name: UpdateOrderTotal :one
-UPDATE orders
-SET total_amount = $2, updated_at = NOW()
-WHERE order_id = $1 AND is_deleted = FALSE
-RETURNING order_id, customer_id, order_number, status, total_amount, shipping_address, billing_address, notes, created_at, updated_at, is_deleted
-`
-
-type UpdateOrderTotalParams struct {
-	OrderID     uuid.UUID      `json:"order_id"`
-	TotalAmount pgtype.Numeric `json:"total_amount"`
-}
-
-func (q *Queries) UpdateOrderTotal(ctx context.Context, arg UpdateOrderTotalParams) (Order, error) {
-	row := q.db.QueryRow(ctx, updateOrderTotal, arg.OrderID, arg.TotalAmount)
-	var i Order
-	err := row.Scan(
-		&i.OrderID,
-		&i.CustomerID,
-		&i.OrderNumber,
-		&i.Status,
-		&i.TotalAmount,
-		&i.ShippingAddress,
-		&i.BillingAddress,
-		&i.Notes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.IsDeleted,

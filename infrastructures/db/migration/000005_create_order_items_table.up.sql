@@ -8,5 +8,3 @@ CREATE TABLE IF NOT EXISTS order_items (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     is_deleted BOOLEAN DEFAULT FALSE
 );
-
-

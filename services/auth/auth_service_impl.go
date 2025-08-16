@@ -5,15 +5,18 @@ import (
 	"fmt"
 
 	"github.com/IainMosima/gomart/configs"
+	"github.com/IainMosima/gomart/domains/auth/entity"
+	"github.com/IainMosima/gomart/domains/auth/repository"
 	"github.com/IainMosima/gomart/domains/auth/schema"
 	"github.com/IainMosima/gomart/domains/auth/service"
 )
 
 type AuthServiceImpl struct {
 	cognitoService service.CognitoServiceInterface
+	authRepo       repository.AuthRepository
 }
 
-func NewAuthServiceImpl(cfg *configs.Config) (service.AuthService, error) {
+func NewAuthServiceImpl(cfg *configs.Config, authRepo repository.AuthRepository) (service.AuthService, error) {
 	cognitoService, err := NewCognitoService(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cognito service: %w", err)
@@ -21,6 +24,7 @@ func NewAuthServiceImpl(cfg *configs.Config) (service.AuthService, error) {
 
 	return &AuthServiceImpl{
 		cognitoService: cognitoService,
+		authRepo:       authRepo,
 	}, nil
 }
 
@@ -40,6 +44,24 @@ func (a *AuthServiceImpl) HandleCallback(ctx context.Context, req *schema.Handle
 	tokenResp, err := a.cognitoService.ExchangeCodeForTokens(ctx, *req.Code)
 	if err != nil {
 		return nil, fmt.Errorf("failed to exchange code for tokens: %w", err)
+	}
+
+	userInfo, err := a.cognitoService.ValidateAccessToken(ctx, tokenResp.AccessToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed to validate access token: %w", err)
+	}
+
+	_, err = a.authRepo.GetUserByID(ctx, userInfo.Email)
+	if err != nil {
+		_, err := a.authRepo.CreateUser(ctx, &entity.Customer{
+			UserID:      userInfo.UserID,
+			PhoneNumber: userInfo.PhoneNumber,
+			UserName:    userInfo.UserName,
+			Email:       userInfo.Email,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create user: %w", err)
+		}
 	}
 
 	return tokenResp, nil

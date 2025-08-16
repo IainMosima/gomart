@@ -68,15 +68,6 @@ func (r *ProductRepositoryImpl) GetByID(ctx context.Context, productID uuid.UUID
 	return r.convertToEntity(result), nil
 }
 
-func (r *ProductRepositoryImpl) GetBySKU(ctx context.Context, sku string) (*entity.Product, error) {
-	result, err := r.store.GetProductBySKU(ctx, sku)
-	if err != nil {
-		return nil, err
-	}
-
-	return r.convertToEntity(result), nil
-}
-
 func (r *ProductRepositoryImpl) Update(ctx context.Context, product *entity.Product) (*entity.Product, error) {
 	var description pgtype.Text
 	if product.Description != nil {
@@ -115,41 +106,8 @@ func (r *ProductRepositoryImpl) Update(ctx context.Context, product *entity.Prod
 	return r.convertToEntity(result), nil
 }
 
-func (r *ProductRepositoryImpl) UpdateStock(ctx context.Context, productID uuid.UUID, stockQuantity int32) (*entity.Product, error) {
-	params := db.UpdateProductStockParams{
-		ProductID:     productID,
-		StockQuantity: stockQuantity,
-	}
-
-	result, err := r.store.UpdateProductStock(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-
-	return r.convertToEntity(result), nil
-}
-
-func (r *ProductRepositoryImpl) UpdateStatus(ctx context.Context, productID uuid.UUID, isActive bool) (*entity.Product, error) {
-	var active pgtype.Bool
-	if err := active.Scan(isActive); err != nil {
-		return nil, err
-	}
-
-	params := db.UpdateProductStatusParams{
-		ProductID: productID,
-		IsActive:  active,
-	}
-
-	result, err := r.store.UpdateProductStatus(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-
-	return r.convertToEntity(result), nil
-}
-
-func (r *ProductRepositoryImpl) SoftDelete(ctx context.Context, productID uuid.UUID) error {
-	return r.store.SoftDeleteProduct(ctx, productID)
+func (r *ProductRepositoryImpl) Delete(ctx context.Context, productID uuid.UUID) error {
+	return r.store.DeleteProduct(ctx, productID)
 }
 
 func (r *ProductRepositoryImpl) GetAll(ctx context.Context) ([]*entity.Product, error) {
@@ -166,22 +124,8 @@ func (r *ProductRepositoryImpl) GetAll(ctx context.Context) ([]*entity.Product, 
 	return products, nil
 }
 
-func (r *ProductRepositoryImpl) GetActiveProducts(ctx context.Context) ([]*entity.Product, error) {
-	results, err := r.store.ListActiveProducts(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	products := make([]*entity.Product, len(results))
-	for i, result := range results {
-		products[i] = r.convertToEntity(result)
-	}
-
-	return products, nil
-}
-
 func (r *ProductRepositoryImpl) GetByCategory(ctx context.Context, categoryID uuid.UUID) ([]*entity.Product, error) {
-	results, err := r.store.ListProductsByCategory(ctx, categoryID)
+	results, err := r.store.GetProductsByCategory(ctx, categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -192,28 +136,6 @@ func (r *ProductRepositoryImpl) GetByCategory(ctx context.Context, categoryID uu
 	}
 
 	return products, nil
-}
-
-func (r *ProductRepositoryImpl) GetInStock(ctx context.Context) ([]*entity.Product, error) {
-	results, err := r.store.ListProductsInStock(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	products := make([]*entity.Product, len(results))
-	for i, result := range results {
-		products[i] = r.convertToEntity(result)
-	}
-
-	return products, nil
-}
-
-func (r *ProductRepositoryImpl) CountProducts(ctx context.Context) (int64, error) {
-	return r.store.CountProducts(ctx)
-}
-
-func (r *ProductRepositoryImpl) CountActiveProducts(ctx context.Context) (int64, error) {
-	return r.store.CountActiveProducts(ctx)
 }
 
 func (r *ProductRepositoryImpl) convertToEntity(dbProduct db.Product) *entity.Product {

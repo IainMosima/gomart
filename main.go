@@ -6,8 +6,7 @@ import (
 
 	"github.com/IainMosima/gomart/configs"
 	db "github.com/IainMosima/gomart/infrastructures/db/sqlc"
-	categoryRepo "github.com/IainMosima/gomart/infrastructures/repository"
-	productRepo "github.com/IainMosima/gomart/infrastructures/repository"
+	repos "github.com/IainMosima/gomart/infrastructures/repository"
 	"github.com/IainMosima/gomart/rest-server"
 	"github.com/IainMosima/gomart/rest-server/handlers/auth"
 	"github.com/IainMosima/gomart/rest-server/handlers/category"
@@ -33,13 +32,14 @@ func main() {
 	store := db.NewStore(connPool)
 
 	// Initialize repositories
-	categoryRepository := categoryRepo.NewCategoryRepository(store)
-	productRepository := productRepo.NewProductRepository(store)
+	categoryRepository := repos.NewCategoryRepository(store)
+	productRepository := repos.NewProductRepository(store)
+	authRepository := repos.NewAuthRepository(store)
 
 	// Initialize services
 	categoryServiceImpl := categoryService.NewCategoryService(categoryRepository)
 	productServiceImpl := productService.NewProductService(productRepository, categoryRepository)
-	authServiceImpl, err := authService.NewAuthServiceImpl(&config)
+	authServiceImpl, err := authService.NewAuthServiceImpl(&config, authRepository)
 	if err != nil {
 		log.Fatal("cannot create auth service:", err)
 	}

@@ -9,8 +9,8 @@ import (
 	reflect "reflect"
 
 	entity "github.com/IainMosima/gomart/domains/product/entity"
+	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
-	gomock "go.uber.org/mock/gomock"
 )
 
 // MockProductRepository is a mock of ProductRepository interface.
@@ -36,36 +36,6 @@ func (m *MockProductRepository) EXPECT() *MockProductRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CountActiveProducts mocks base method.
-func (m *MockProductRepository) CountActiveProducts(ctx context.Context) (int64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountActiveProducts", ctx)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CountActiveProducts indicates an expected call of CountActiveProducts.
-func (mr *MockProductRepositoryMockRecorder) CountActiveProducts(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountActiveProducts", reflect.TypeOf((*MockProductRepository)(nil).CountActiveProducts), ctx)
-}
-
-// CountProducts mocks base method.
-func (m *MockProductRepository) CountProducts(ctx context.Context) (int64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountProducts", ctx)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CountProducts indicates an expected call of CountProducts.
-func (mr *MockProductRepositoryMockRecorder) CountProducts(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountProducts", reflect.TypeOf((*MockProductRepository)(nil).CountProducts), ctx)
-}
-
 // Create mocks base method.
 func (m *MockProductRepository) Create(ctx context.Context, product *entity.Product) (*entity.Product, error) {
 	m.ctrl.T.Helper()
@@ -81,19 +51,18 @@ func (mr *MockProductRepositoryMockRecorder) Create(ctx, product interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProductRepository)(nil).Create), ctx, product)
 }
 
-// GetActiveProducts mocks base method.
-func (m *MockProductRepository) GetActiveProducts(ctx context.Context) ([]*entity.Product, error) {
+// Delete mocks base method.
+func (m *MockProductRepository) Delete(ctx context.Context, productID uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetActiveProducts", ctx)
-	ret0, _ := ret[0].([]*entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Delete", ctx, productID)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// GetActiveProducts indicates an expected call of GetActiveProducts.
-func (mr *MockProductRepositoryMockRecorder) GetActiveProducts(ctx interface{}) *gomock.Call {
+// Delete indicates an expected call of Delete.
+func (mr *MockProductRepositoryMockRecorder) Delete(ctx, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActiveProducts", reflect.TypeOf((*MockProductRepository)(nil).GetActiveProducts), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductRepository)(nil).Delete), ctx, productID)
 }
 
 // GetAll mocks base method.
@@ -141,50 +110,6 @@ func (mr *MockProductRepositoryMockRecorder) GetByID(ctx, productID interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockProductRepository)(nil).GetByID), ctx, productID)
 }
 
-// GetBySKU mocks base method.
-func (m *MockProductRepository) GetBySKU(ctx context.Context, sku string) (*entity.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBySKU", ctx, sku)
-	ret0, _ := ret[0].(*entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetBySKU indicates an expected call of GetBySKU.
-func (mr *MockProductRepositoryMockRecorder) GetBySKU(ctx, sku interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySKU", reflect.TypeOf((*MockProductRepository)(nil).GetBySKU), ctx, sku)
-}
-
-// GetInStock mocks base method.
-func (m *MockProductRepository) GetInStock(ctx context.Context) ([]*entity.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetInStock", ctx)
-	ret0, _ := ret[0].([]*entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetInStock indicates an expected call of GetInStock.
-func (mr *MockProductRepositoryMockRecorder) GetInStock(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInStock", reflect.TypeOf((*MockProductRepository)(nil).GetInStock), ctx)
-}
-
-// SoftDelete mocks base method.
-func (m *MockProductRepository) SoftDelete(ctx context.Context, productID uuid.UUID) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SoftDelete", ctx, productID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SoftDelete indicates an expected call of SoftDelete.
-func (mr *MockProductRepositoryMockRecorder) SoftDelete(ctx, productID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SoftDelete", reflect.TypeOf((*MockProductRepository)(nil).SoftDelete), ctx, productID)
-}
-
 // Update mocks base method.
 func (m *MockProductRepository) Update(ctx context.Context, product *entity.Product) (*entity.Product, error) {
 	m.ctrl.T.Helper()
@@ -198,34 +123,4 @@ func (m *MockProductRepository) Update(ctx context.Context, product *entity.Prod
 func (mr *MockProductRepositoryMockRecorder) Update(ctx, product interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockProductRepository)(nil).Update), ctx, product)
-}
-
-// UpdateStatus mocks base method.
-func (m *MockProductRepository) UpdateStatus(ctx context.Context, productID uuid.UUID, isActive bool) (*entity.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateStatus", ctx, productID, isActive)
-	ret0, _ := ret[0].(*entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateStatus indicates an expected call of UpdateStatus.
-func (mr *MockProductRepositoryMockRecorder) UpdateStatus(ctx, productID, isActive interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStatus", reflect.TypeOf((*MockProductRepository)(nil).UpdateStatus), ctx, productID, isActive)
-}
-
-// UpdateStock mocks base method.
-func (m *MockProductRepository) UpdateStock(ctx context.Context, productID uuid.UUID, stockQuantity int32) (*entity.Product, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateStock", ctx, productID, stockQuantity)
-	ret0, _ := ret[0].(*entity.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateStock indicates an expected call of UpdateStock.
-func (mr *MockProductRepositoryMockRecorder) UpdateStock(ctx, productID, stockQuantity interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStock", reflect.TypeOf((*MockProductRepository)(nil).UpdateStock), ctx, productID, stockQuantity)
 }

@@ -5,8 +5,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/IainMosima/gomart/domains/auth/entity"
+	"github.com/IainMosima/gomart/domains/auth/repository"
 	"github.com/IainMosima/gomart/domains/auth/schema"
 	"github.com/IainMosima/gomart/domains/auth/service"
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -92,10 +96,21 @@ func TestAuthServiceImpl_GetAuthURL_CognitoError(t *testing.T) {
 }
 
 func TestAuthServiceImpl_HandleCallback_Success(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
 	expectedTokens := &schema.TokenResponse{
 		AccessToken:  "access-token",
 		RefreshToken: "refresh-token",
 		IDToken:      "id-token",
+	}
+
+	expectedUserInfo := &schema.UserInfoResponse{
+		UserID:        uuid.New(),
+		UserName:      "testuser",
+		Email:         "test@example.com",
+		EmailVerified: true,
+		PhoneNumber:   "+1234567890",
 	}
 
 	mockCognito := &MockCognitoService{
@@ -103,10 +118,33 @@ func TestAuthServiceImpl_HandleCallback_Success(t *testing.T) {
 			assert.Equal(t, "auth-code", code)
 			return expectedTokens, nil
 		},
+		ValidateAccessTokenFunc: func(ctx context.Context, accessToken string) (*schema.UserInfoResponse, error) {
+			assert.Equal(t, "access-token", accessToken)
+			return expectedUserInfo, nil
+		},
 	}
+
+	mockAuthRepo := repository.NewMockAuthRepository(ctrl)
+	mockAuthRepo.EXPECT().
+		GetUserByID(gomock.Any(), expectedUserInfo.Email).
+		Return(nil, errors.New("user not found")).
+		Times(1)
+
+	expectedCustomer := &entity.Customer{
+		UserID:      expectedUserInfo.UserID,
+		PhoneNumber: expectedUserInfo.PhoneNumber,
+		UserName:    expectedUserInfo.UserName,
+		Email:       expectedUserInfo.Email,
+	}
+
+	mockAuthRepo.EXPECT().
+		CreateUser(gomock.Any(), expectedCustomer).
+		Return(expectedCustomer, nil).
+		Times(1)
 
 	authSvc := &AuthServiceImpl{
 		cognitoService: mockCognito,
+		authRepo:       mockAuthRepo,
 	}
 
 	code := "auth-code"
@@ -277,20 +315,53 @@ func TestAuthServiceImpl_GetAuthURL_EmptyState(t *testing.T) {
 }
 
 func TestAuthServiceImpl_HandleCallback_EmptyState(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
 	expectedTokens := &schema.TokenResponse{
 		AccessToken:  "access-token",
 		RefreshToken: "refresh-token",
 		IDToken:      "id-token",
 	}
 
+	expectedUserInfo := &schema.UserInfoResponse{
+		UserID:        uuid.New(),
+		UserName:      "testuser",
+		Email:         "test@example.com",
+		EmailVerified: true,
+		PhoneNumber:   "+1234567890",
+	}
+
 	mockCognito := &MockCognitoService{
 		ExchangeCodeForTokensFunc: func(ctx context.Context, code string) (*schema.TokenResponse, error) {
 			return expectedTokens, nil
 		},
+		ValidateAccessTokenFunc: func(ctx context.Context, accessToken string) (*schema.UserInfoResponse, error) {
+			return expectedUserInfo, nil
+		},
 	}
+
+	mockAuthRepo := repository.NewMockAuthRepository(ctrl)
+	mockAuthRepo.EXPECT().
+		GetUserByID(gomock.Any(), expectedUserInfo.Email).
+		Return(nil, errors.New("user not found")).
+		Times(1)
+
+	expectedCustomer := &entity.Customer{
+		UserID:      expectedUserInfo.UserID,
+		PhoneNumber: expectedUserInfo.PhoneNumber,
+		UserName:    expectedUserInfo.UserName,
+		Email:       expectedUserInfo.Email,
+	}
+
+	mockAuthRepo.EXPECT().
+		CreateUser(gomock.Any(), expectedCustomer).
+		Return(expectedCustomer, nil).
+		Times(1)
 
 	authSvc := &AuthServiceImpl{
 		cognitoService: mockCognito,
+		authRepo:       mockAuthRepo,
 	}
 
 	code := "auth-code"
