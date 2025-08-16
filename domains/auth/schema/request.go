@@ -1,8 +1,8 @@
 package schema
 
-type LoginRequest struct {
-	RedirectURI string `json:"redirect_uri" validate:"required,url"`
-	State       string `json:"state,omitempty"`
+type HandleCallbackRequest struct {
+	Code  *string `json:"code,omitempty"`
+	State string  `json:"state,omitempty"`
 }
 
 type TokenExchangeRequest struct {

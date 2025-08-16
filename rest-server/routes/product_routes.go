@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"github.com/IainMosima/gomart/rest-server/handlers"
+	"github.com/IainMosima/gomart/rest-server/handlers/product"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupProductRoutes(router *gin.Engine, productHandler handlers.ProductHandlerInterface) {
+func SetupProductRoutes(router *gin.Engine, productHandler product.ProductHandlerInterface) {
 	products := router.Group("/products")
 	{
 		products.POST("", productHandler.CreateProduct)

@@ -51,3 +51,11 @@ type ProductSearchRequestDTO struct {
 	Page       int        `json:"page,omitempty" form:"page" validate:"min=1"`
 	Limit      int        `json:"limit,omitempty" form:"limit" validate:"min=1,max=100"`
 }
+
+type ValidateTokenRequestDTO struct {
+	AccessToken string `json:"access_token" validate:"required"`
+}
+
+type RefreshTokenRequestDTO struct {
+	RefreshToken string `json:"refresh_token" validate:"required"`
+}

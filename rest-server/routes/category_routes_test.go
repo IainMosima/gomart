@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/IainMosima/gomart/domains/category/service"
-	"github.com/IainMosima/gomart/rest-server/handlers"
+	"github.com/IainMosima/gomart/rest-server/handlers/category"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -15,7 +15,7 @@ func TestSetupCategoryRoutes(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockService := service.NewMockCategoryService(ctrl)
-	handler := handlers.NewCategoryHandler(mockService)
+	handler := category.NewCategoryHandler(mockService)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -58,7 +58,7 @@ func TestSetupCategoryRoutes_HandlerIntegration(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockService := service.NewMockCategoryService(ctrl)
-	handler := handlers.NewCategoryHandler(mockService)
+	handler := category.NewCategoryHandler(mockService)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()

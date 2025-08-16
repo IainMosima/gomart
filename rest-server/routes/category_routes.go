@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"github.com/IainMosima/gomart/rest-server/handlers"
+	"github.com/IainMosima/gomart/rest-server/handlers/category"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupCategoryRoutes(router *gin.Engine, categoryHandler handlers.CategoryHandlerInterface) {
+func SetupCategoryRoutes(router *gin.Engine, categoryHandler category.CategoryHandlerInterface) {
 	categories := router.Group("/categories")
 	{
 		categories.POST("", categoryHandler.CreateCategory)

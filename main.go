@@ -9,7 +9,10 @@ import (
 	categoryRepo "github.com/IainMosima/gomart/infrastructures/repository"
 	productRepo "github.com/IainMosima/gomart/infrastructures/repository"
 	"github.com/IainMosima/gomart/rest-server"
-	"github.com/IainMosima/gomart/rest-server/handlers"
+	"github.com/IainMosima/gomart/rest-server/handlers/auth"
+	"github.com/IainMosima/gomart/rest-server/handlers/category"
+	"github.com/IainMosima/gomart/rest-server/handlers/product"
+	authService "github.com/IainMosima/gomart/services/auth"
 	categoryService "github.com/IainMosima/gomart/services/category"
 	productService "github.com/IainMosima/gomart/services/product"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -36,13 +39,18 @@ func main() {
 	// Initialize services
 	categoryServiceImpl := categoryService.NewCategoryService(categoryRepository)
 	productServiceImpl := productService.NewProductService(productRepository, categoryRepository)
+	authServiceImpl, err := authService.NewAuthServiceImpl(&config)
+	if err != nil {
+		log.Fatal("cannot create auth service:", err)
+	}
 
 	// Initialize handlers
-	categoryHandler := handlers.NewCategoryHandler(categoryServiceImpl)
-	productHandler := handlers.NewProductHandler(productServiceImpl)
+	categoryHandler := category.NewCategoryHandler(categoryServiceImpl)
+	productHandler := product.NewProductHandler(productServiceImpl)
+	authHandler := auth.NewAuthHandlerImpl(authServiceImpl)
 
 	// Initialize REST server
-	server := rest_server.NewRestServer(categoryHandler, productHandler)
+	server := rest_server.NewRestServer(categoryHandler, productHandler, authHandler)
 
 	// Start HTTP server
 	if err := server.Start(config.HTTPServerAddress); err != nil {

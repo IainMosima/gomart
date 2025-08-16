@@ -16,9 +16,24 @@ migratedown:
 sqlc:
 	sqlc generate
 
-mockgen:
-	@echo "Usage: make mockgen SOURCE=path/to/interface.go DEST=mocks/mock_name.go"
-	@echo "Example: make mockgen SOURCE=domains/category/repository/category_repo_int.go DEST=mocks/category_repo_mock.go"
+mockgen-auth:
+	mockgen -source=domains/auth/service/auth_service_int.go -destination=domains/auth/service/auth_service_mock.go -package=service
+	mockgen -source=domains/auth/service/cognito_service_int.go -destination=domains/auth/service/cognito_service_mock.go -package=service
+
+mockgen-category:
+	mockgen -source=domains/category/service/category_service_int.go -destination=domains/category/service/category_service_mock.go -package=service
+
+mockgen-product:
+	mockgen -source=domains/product/service/product_service_int.go -destination=domains/product/service/product_service_mock.go -package=service
+
+mockgen-customer:
+	mockgen -source=domains/customer/service/customer_service_int.go -destination=domains/customer/service/customer_service_mock.go -package=service
+
+mockgen-order:
+	mockgen -source=domains/order/service/order_service_int.go -destination=domains/order/service/order_service_mock.go -package=service
+
+mockgen-all: mockgen-auth mockgen-category mockgen-product mockgen-customer mockgen-order
+	@echo "All domain mocks generated successfully!"
 
 test:
 	go test ./... -v
@@ -52,4 +67,4 @@ seed: seed-categories seed-products
 seed-verify:
 	psql postgres://root:supersecret@localhost:5432/gomart_db -c "SELECT 'Categories' as type, COUNT(*)::text as count FROM categories WHERE is_deleted = FALSE UNION ALL SELECT 'Products' as type, COUNT(*)::text as count FROM products WHERE is_deleted = FALSE UNION ALL SELECT 'Price Range' as type, CONCAT('KES ', MIN(price), ' - ', MAX(price)) as count FROM products WHERE is_deleted = FALSE;"
 
-.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed seed-verify
+.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen mockgen-auth mockgen-category mockgen-product mockgen-customer mockgen-order mockgen-all test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed seed-verify

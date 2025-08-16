@@ -3,24 +3,24 @@ package routes
 import (
 	"testing"
 
-	"github.com/IainMosima/gomart/domains/product/service"
-	"github.com/IainMosima/gomart/rest-server/handlers/product"
+	"github.com/IainMosima/gomart/domains/auth/service"
+	"github.com/IainMosima/gomart/rest-server/handlers/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/mock/gomock"
 )
 
-func TestSetupProductRoutes(t *testing.T) {
+func TestSetupAuthRoutes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockService := service.NewMockProductService(ctrl)
-	handler := product.NewProductHandler(mockService)
+	mockService := service.NewMockAuthService(ctrl)
+	handler := auth.NewAuthHandlerImpl(mockService)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
-	SetupProductRoutes(router, handler)
+	SetupAuthRoutes(router, handler)
 
 	routes := router.Routes()
 
@@ -28,12 +28,10 @@ func TestSetupProductRoutes(t *testing.T) {
 		method string
 		path   string
 	}{
-		{"POST", "/products"},
-		{"GET", "/products"},
-		{"GET", "/products/:id"},
-		{"PUT", "/products/:id"},
-		{"DELETE", "/products/:id"},
-		{"GET", "/products/category/:categoryId"},
+		{"GET", "/cognito/callback"},
+		{"POST", "/auth/validate"},
+		{"POST", "/auth/refresh"},
+		{"GET", "/auth/login"},
 	}
 
 	assert.Equal(t, len(expectedRoutes), len(routes), "Number of registered routes should match expected")
@@ -52,31 +50,30 @@ func TestSetupProductRoutes(t *testing.T) {
 	}
 }
 
-func TestSetupProductRoutes_HandlerIntegration(t *testing.T) {
+func TestSetupAuthRoutes_HandlerIntegration(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockService := service.NewMockProductService(ctrl)
-	handler := product.NewProductHandler(mockService)
+	mockService := service.NewMockAuthService(ctrl)
+	handler := auth.NewAuthHandlerImpl(mockService)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
 	assert.NotPanics(t, func() {
-		SetupProductRoutes(router, handler)
-	}, "SetupProductRoutes should not panic with valid inputs")
+		SetupAuthRoutes(router, handler)
+	}, "SetupAuthRoutes should not panic with valid inputs")
 
 	routes := router.Routes()
 	assert.NotEmpty(t, routes, "Router should have routes after setup")
-	assert.Len(t, routes, 6, "Should have exactly 6 product routes")
+	assert.Len(t, routes, 4, "Should have exactly 4 auth routes")
 }
 
-func TestSetupProductRoutes_NilHandler(t *testing.T) {
+func TestSetupAuthRoutes_NilHandler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
-	// This should panic when trying to access nil handler methods
 	assert.Panics(t, func() {
-		SetupProductRoutes(router, nil)
-	}, "SetupProductRoutes should panic with nil handler")
+		SetupAuthRoutes(router, nil)
+	}, "SetupAuthRoutes should panic with nil handler")
 }

@@ -3,6 +3,7 @@ package schema
 import (
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
 
@@ -12,11 +13,9 @@ type LoginResponse struct {
 }
 
 type TokenResponse struct {
-	AccessToken  string           `json:"access_token"`
-	RefreshToken string           `json:"refresh_token"`
-	TokenType    string           `json:"token_type"`
-	ExpiresIn    int              `json:"expires_in"`
-	Customer     CustomerResponse `json:"customer"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	IDToken      string `json:"id_token"`
 }
 
 type CustomerResponse struct {
@@ -40,15 +39,34 @@ type RefreshTokenResponse struct {
 }
 
 type UserInfoResponse struct {
-	Sub           string `json:"sub"`
+	UserName      string `json:"user_name"`
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"email_verified"`
-	Name          string `json:"name"`
-	GivenName     string `json:"given_name"`
-	FamilyName    string `json:"family_name"`
+	PhoneNumber   string `json:"phone_number"`
 }
 
 type LogoutResponse struct {
 	Message string `json:"message"`
 	Success bool   `json:"success"`
+}
+
+type CognitoTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
+	IDToken      string `json:"id_token"`
+}
+
+type CognitoUserInfoJWTClaims struct {
+	Sub                 string `json:"sub"`
+	CognitoUsername     string `json:"cognito:username"`
+	Email               string `json:"email"`
+	EmailVerified       bool   `json:"email_verified"`
+	PhoneNumber         string `json:"phone_number,omitempty"`
+	PhoneNumberVerified bool   `json:"phone_number_verified,omitempty"`
+	GivenName           string `json:"given_name,omitempty"`
+	FamilyName          string `json:"family_name,omitempty"`
+	Name                string `json:"name,omitempty"`
+	jwt.RegisteredClaims
 }
