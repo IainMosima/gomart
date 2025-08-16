@@ -16,22 +16,3 @@ type OrderItem struct {
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	IsDeleted   bool      `json:"is_deleted" db:"is_deleted"`
 }
-
-type OrderItemWithDetails struct {
-	OrderItem
-	ProductName        string  `json:"product_name"`
-	ProductSKU         string  `json:"product_sku"`
-	ProductDescription *string `json:"product_description,omitempty"`
-}
-
-type OrderSummary struct {
-	OrderID     uuid.UUID               `json:"order_id"`
-	OrderNumber string                  `json:"order_number"`
-	CustomerID  uuid.UUID               `json:"customer_id"`
-	Status      OrderStatus             `json:"status"`
-	TotalAmount float64                 `json:"total_amount"`
-	ItemCount   int                     `json:"item_count"`
-	Items       []*OrderItemWithDetails `json:"items"`
-	CreatedAt   time.Time               `json:"created_at"`
-	UpdatedAt   *time.Time              `json:"updated_at,omitempty"`
-}
