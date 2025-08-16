@@ -10,7 +10,7 @@ import (
 )
 
 type AuthServiceImpl struct {
-	cognitoService *CognitoService
+	cognitoService service.CognitoServiceInterface
 }
 
 func NewAuthServiceImpl(cfg *configs.Config) (service.AuthService, error) {

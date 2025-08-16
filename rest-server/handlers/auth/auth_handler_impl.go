@@ -25,6 +25,7 @@ func (a *AuthHandlerImpl) HandleCognitoCallback(c *gin.Context) {
 
 	if code == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "code is required"})
+		return
 	}
 
 	tokenResponse, err := a.authService.HandleCallback(c, &schema.HandleCallbackRequest{

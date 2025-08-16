@@ -2,8 +2,11 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"net/url"
 
 	"github.com/IainMosima/gomart/configs"
@@ -105,30 +108,49 @@ func (c *CognitoService) ExchangeCodeForTokens(ctx context.Context, code string)
 }
 
 func (c *CognitoService) ValidateAccessToken(ctx context.Context, accessToken string) (*schema.UserInfoResponse, error) {
-	verifier := c.oidcProvider.Verifier(&oidc.Config{ClientID: c.config.CognitoClientID})
+	userInfoURL := fmt.Sprintf("https://%s/oauth2/userInfo", c.config.CognitoDomain)
 
-	idToken, err := verifier.Verify(ctx, accessToken)
+	req, err := http.NewRequestWithContext(ctx, "GET", userInfoURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to verify token: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	var claims struct {
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call userInfo endpoint: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("userInfo request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var userInfoClaims struct {
 		Sub           string `json:"sub"`
-		Username      string `json:"cognito:username"`
+		Username      string `json:"username"`
 		Email         string `json:"email"`
-		EmailVerified bool   `json:"email_verified"`
+		EmailVerified string `json:"email_verified"`
 		PhoneNumber   string `json:"phone_number"`
 	}
 
-	if err := idToken.Claims(&claims); err != nil {
-		return nil, fmt.Errorf("failed to extract claims: %w", err)
+	if err := json.Unmarshal(body, &userInfoClaims); err != nil {
+		return nil, fmt.Errorf("failed to parse userInfo response: %w", err)
 	}
 
 	userInfo := &schema.UserInfoResponse{
-		UserName:      claims.Username,
-		Email:         claims.Email,
-		EmailVerified: claims.EmailVerified,
-		PhoneNumber:   claims.PhoneNumber,
+		UserName:      userInfoClaims.Username,
+		Email:         userInfoClaims.Email,
+		EmailVerified: userInfoClaims.EmailVerified == "true",
+		PhoneNumber:   userInfoClaims.PhoneNumber,
 	}
 
 	return userInfo, nil
