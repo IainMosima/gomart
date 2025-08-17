@@ -6,10 +6,7 @@ import (
 	"github.com/IainMosima/gomart/domains/order/schema"
 )
 
-type EmailNotificationService interface {
-	SendOrderNotificationEmail(ctx context.Context, order *schema.OrderResponse) error
-}
-
-type SMSNotificationService interface {
-	SendOrderConfirmationSMS(ctx context.Context, customerPhone, orderNumber string, totalAmount float64) error
+type NotificationService interface {
+	SendEmail(ctx context.Context, order *schema.OrderResponse) error
+	SendSMS(ctx context.Context, order *schema.OrderResponse) error
 }

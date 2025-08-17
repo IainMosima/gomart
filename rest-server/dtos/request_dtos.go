@@ -59,3 +59,13 @@ type ValidateTokenRequestDTO struct {
 type RefreshTokenRequestDTO struct {
 	RefreshToken string `json:"refresh_token" validate:"required"`
 }
+
+type CreateOrderRequestDTO struct {
+	CustomerID uuid.UUID                   `json:"customer_id" validate:"required"`
+	Items      []CreateOrderItemRequestDTO `json:"items" validate:"required,min=1,dive"`
+}
+
+type CreateOrderItemRequestDTO struct {
+	ProductID uuid.UUID `json:"product_id" validate:"required"`
+	Quantity  int32     `json:"quantity" validate:"required,min=1"`
+}

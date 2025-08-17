@@ -44,12 +44,7 @@ func (r *AuthRepositoryImpl) GetUserByEmail(ctx context.Context, email string) (
 	return r.convertToEntity(result), nil
 }
 
-func (r *AuthRepositoryImpl) GetUserByID(ctx context.Context, id string) (*entity.Customer, error) {
-	userID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, err
-	}
-
+func (r *AuthRepositoryImpl) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.Customer, error) {
 	result, err := r.store.GetUser(ctx, userID)
 	if err != nil {
 		return nil, err

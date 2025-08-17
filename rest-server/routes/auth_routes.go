@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupAuthRoutes(router *gin.Engine, authHandler auth.AuthHandler) {
+func SetupAuthRoutes(router *gin.Engine, authHandler auth.AuthHandlerInterface) {
 	router.GET("/cognito/callback", authHandler.HandleCognitoCallback)
 
 	authGroup := router.Group("/auth")

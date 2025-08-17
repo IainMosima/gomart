@@ -126,7 +126,7 @@ func TestAuthServiceImpl_HandleCallback_Success(t *testing.T) {
 
 	mockAuthRepo := repository.NewMockAuthRepository(ctrl)
 	mockAuthRepo.EXPECT().
-		GetUserByID(gomock.Any(), expectedUserInfo.Email).
+		GetUserByID(gomock.Any(), expectedUserInfo.UserID).
 		Return(nil, errors.New("user not found")).
 		Times(1)
 
@@ -343,7 +343,7 @@ func TestAuthServiceImpl_HandleCallback_EmptyState(t *testing.T) {
 
 	mockAuthRepo := repository.NewMockAuthRepository(ctrl)
 	mockAuthRepo.EXPECT().
-		GetUserByID(gomock.Any(), expectedUserInfo.Email).
+		GetUserByID(gomock.Any(), expectedUserInfo.UserID).
 		Return(nil, errors.New("user not found")).
 		Times(1)
 
