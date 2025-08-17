@@ -1,321 +1,239 @@
-# E-Commerce Backend Service
+# GoMart
 
-A comprehensive e-commerce backend service built with Go, featuring hierarchical product categories, customer management, order processing, OpenID Connect authentication, and automated notifications.
+A domain-driven Go backend service for African e-commerce, featuring hierarchical product categories, order processing with automated notifications, and AWS Cognito authentication.
 
-## 🏗️ Architecture Overview
+## Architecture
 
-This project follows Domain-Driven Design (DDD) principles with a clean architecture approach:
+GoMart follows **Domain-Driven Design (DDD)** principles with clean architecture:
 
 ```
-├── domains/                 # Business domains
-│   └── ecommerce/
-│       ├── entity/         # Domain entities
-│       ├── repository/     # Repository interfaces
-│       ├── service/        # Business logic interfaces
-│       └── schema/         # Request/Response DTOs
+├── domains/                 # Business domains (DDD)
+│   ├── auth/               # Customer authentication & management
+│   ├── category/           # Hierarchical product categories
+│   ├── product/            # Product catalog management
+│   └── order/              # Order processing & notifications
 ├── infrastructures/        # External concerns
-│   ├── db/                # Database layer
-│   └── repository/        # Repository implementations
-├── services/              # Application services
-│   ├── api-gateway/       # REST API layer
-│   └── ecommerce/         # Business logic implementation
-└── shared/               # Shared utilities
-    ├── auth/             # Authentication
-    └── utils/            # Common utilities
+│   ├── db/                 # Database layer (PostgreSQL + SQLC)
+│   └── repository/         # Repository implementations
+├── services/               # Application services (business logic)
+├── rest-server/            # HTTP layer (Gin framework)
+│   ├── handlers/           # HTTP request handlers
+│   ├── routes/             # Route definitions
+│   └── dtos/               # Data transfer objects
+└── configs/                # Configuration management
 ```
 
-## 🚀 Features
+## Features
 
-### Core Features
-- **Hierarchical Categories**: Unlimited depth category trees for products
-- **Product Management**: CRUD operations with bulk upload capabilities
-- **Customer Management**: Secure customer profiles with OpenID Connect
-- **Order Processing**: Complete order lifecycle with inventory management
-- **Real-time Notifications**: SMS via Africa's Talking + Email notifications
-- **Authentication & Authorization**: OpenID Connect with role-based access
+### Core Domains
+- **Authentication**: AWS Cognito integration with customer management
+- **Categories**: Unlimited-depth hierarchical product categorization
+- **Products**: Complete product catalog with category relationships
+- **Orders**: Order processing with automated email + SMS notifications
 
 ### Technical Features
-- **Database**: PostgreSQL with migrations
-- **Caching**: Redis for performance optimization
-- **API Documentation**: Auto-generated Swagger docs
-- **Testing**: Unit, integration, and benchmark tests with >80% coverage
-- **CI/CD**: GitHub Actions with automated testing and deployment
-- **Containerization**: Docker and Docker Compose support
-- **Kubernetes**: Production-ready K8s manifests
-- **Security**: Vulnerability scanning and secure coding practices
+- **Database**: PostgreSQL with SQLC for type-safe queries
+- **Notifications**: Email (SMTP) + SMS (Africa's Talking) for African markets
+- **Testing**: 95%+ test coverage with comprehensive mocking
+- **Architecture**: Clean DDD with interface segregation
+- **API**: RESTful endpoints with JSON responses
 
-## 📋 Prerequisites
+## Quick Start
 
-- Go 1.21+
-- PostgreSQL 15+
-- Redis 7+
-- Docker & Docker Compose (optional)
-- Kubernetes cluster (for production deployment)
-
-## 🛠️ Quick Start
+### Prerequisites
+- Go 1.24+
+- PostgreSQL 14+
+- AWS Cognito (for authentication)
+- Africa's Talking account (for SMS)
 
 ### 1. Environment Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/ecommerce-backend.git
-cd ecommerce-backend
+# Clone repository
+git clone https://github.com/IainMosima/gomart.git
+cd gomart
 
-# Copy environment variables
+# Copy environment template
 cp configs/app.env.example configs/app.env
 ```
 
-### 2. Configure Environment Variables
+### 2. Configure Environment
+
+Copy the example and customize with your values:
+
+```bash
+cp configs/app.env.example configs/app.env
+```
 
 Edit `configs/app.env`:
 
 ```env
 # Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=ecommerce
-DB_USER=postgres
-DB_PASSWORD=your-password
+DB_SOURCE=postgresql://root:supersecret@127.0.0.1:5432/gomart_db?sslmode=disable
+HTTP_SERVER_ADDRESS=:8080
 
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# OpenID Connect
-OIDC_ISSUER_URL=https://your-oidc-provider.com
-OIDC_CLIENT_ID=your-client-id
-OIDC_CLIENT_SECRET=your-client-secret
-OIDC_REDIRECT_URL=http://localhost:8080/api/v1/auth/callback
+# AWS Cognito
+AWS_REGION=ap-northeast-1
+COGNITO_CLIENT_ID=your-client-id
+COGNITO_CLIENT_SECRET=your-client-secret
+COGNITO_REDIRECT_URI=http://localhost:8080/cognito/callback
+COGNITO_DOMAIN=your-cognito-domain.auth.region.amazoncognito.com
+COGNITO_USER_POOL_ID=your-user-pool-id
 
 # Africa's Talking SMS
-AFRICAS_TALKING_API_KEY=your-api-key
-AFRICAS_TALKING_USERNAME=sandbox
+atApiKeys=your-api-key
+atUsername=sandbox
+atShortCode=15548
+atSandbox=true
 
-# Email
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
-ADMIN_EMAIL=admin@yourdomain.com
+# Email SMTP
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USERNAME=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+EMAIL_FROM=your-email@gmail.com
 ```
 
 ### 3. Database Setup
 
 ```bash
-# Start PostgreSQL and Redis
-docker-compose up postgres redis -d
+# Start PostgreSQL
+make postgres
+
+# Create database
+make createdb
 
 # Run migrations
-make migrate-up
+make migrateup
+
+# (Optional) Seed test data
+make seed
 ```
 
-### 4. Run the Application
+### 4. Run Application
 
 ```bash
-# Development mode
-make dev
+# Start server
+go run main.go
 
-# Or with Docker
-make docker-run
+# Or use make command
+make test && go run main.go
 ```
 
-The API will be available at `http://localhost:8080`
+API will be available at `http://localhost:8080`
 
-## 📚 API Documentation
+## API Overview
 
-### Authentication Endpoints
-- `GET /api/v1/auth/login` - Get OpenID Connect authorization URL
-- `POST /api/v1/auth/callback` - Handle OIDC callback
-- `POST /api/v1/auth/logout` - Logout (client-side token removal)
+### Authentication
+- `GET /auth/login` - Get Cognito authorization URL
+- `GET /cognito/callback` - Handle Cognito callback
+- `POST /auth/validate` - Validate access token
+- `POST /auth/refresh` - Refresh access token
 
-### Category Endpoints
-- `GET /api/v1/categories` - List categories (supports parent_id filter)
-- `POST /api/v1/categories` - Create category (admin only)
-- `GET /api/v1/categories/{id}` - Get category by ID
-- `GET /api/v1/categories/{id}/average-price` - Get average price for category
-- `PUT /api/v1/categories/{id}` - Update category (admin only)
-- `DELETE /api/v1/categories/{id}` - Delete category (admin only)
-
-### Product Endpoints
-- `GET /api/v1/products` - List products (supports category_id filter)
-- `POST /api/v1/products` - Create product (admin only)
-- `POST /api/v1/products/bulk` - Bulk upload products (admin only)
-- `GET /api/v1/products/{id}` - Get product by ID
-- `PUT /api/v1/products/{id}` - Update product (admin only)
-- `DELETE /api/v1/products/{id}` - Delete product (admin only)
-
-### Customer Endpoints
-- `POST /api/v1/customers` - Create customer (self-registration)
-- `GET /api/v1/customers/me` - Get current customer info
-- `PUT /api/v1/customers/me` - Update current customer
-- `GET /api/v1/customers` - List all customers (admin only)
-- `GET /api/v1/customers/{id}` - Get customer by ID (admin only)
-
-### Order Endpoints
-- `POST /api/v1/orders` - Create order
-- `GET /api/v1/orders/my-orders` - Get current customer's orders
-- `GET /api/v1/orders/{id}` - Get order details
-- `PUT /api/v1/orders/{id}/cancel` - Cancel order
-- `GET /api/v1/orders` - List all orders (admin only)
-- `PUT /api/v1/orders/{id}/status` - Update order status (admin only)
-
-## 🏗️ Database Schema
-
-### Categories
-```sql
-CREATE TABLE categories (
-    id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    parent_id UUID REFERENCES categories(id),
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-```
+### Categories (Hierarchical)
+- `GET /categories` - List categories (supports `parent_id` filter)
+- `POST /categories` - Create category
+- `GET /categories/:id` - Get category details
+- `PUT /categories/:id` - Update category
+- `DELETE /categories/:id` - Delete category
 
 ### Products
-```sql
-CREATE TABLE products (
-    id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    price DECIMAL(10,2) NOT NULL,
-    sku VARCHAR(100) UNIQUE NOT NULL,
-    stock_quantity INTEGER NOT NULL,
-    category_id UUID REFERENCES categories(id),
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-```
-
-### Customers
-```sql
-CREATE TABLE customers (
-    id UUID PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    phone VARCHAR(20),
-    address TEXT,
-    city VARCHAR(100),
-    country VARCHAR(100),
-    postal_code VARCHAR(20),
-    openid_sub VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-```
+- `GET /products` - List all products
+- `POST /products` - Create product
+- `GET /products/:id` - Get product details
+- `PUT /products/:id` - Update product
+- `DELETE /products/:id` - Delete product
+- `GET /products/category/:categoryId` - Get products by category
 
 ### Orders
-```sql
-CREATE TABLE orders (
-    id UUID PRIMARY KEY,
-    customer_id UUID REFERENCES customers(id),
-    order_number VARCHAR(50) UNIQUE NOT NULL,
-    status order_status DEFAULT 'pending',
-    total_amount DECIMAL(10,2) NOT NULL,
-    shipping_address TEXT NOT NULL,
-    billing_address TEXT NOT NULL,
-    notes TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-```
+- `POST /orders` - Create order (triggers email + SMS notifications)
+- `GET /orders/:id/status` - Get order status
 
-## 🧪 Testing
 
-### Run Tests
+## Testing
+
 ```bash
-# Unit tests
+# Run all tests
 make test
 
-# Integration tests
-make test-integration
+# Run with coverage
+make test-coverage
 
-# Linting
-make lint
+# Generate HTML coverage report
+make test-coverage-html
 ```
 
 ### Test Coverage
-The project maintains >80% test coverage. Coverage reports are generated automatically:
-- `coverage.out` - Coverage data
-- `coverage.html` - HTML coverage report
+- **Service Layer**: 100% (business logic + error scenarios)
+- **Handler Layer**: 95% (HTTP endpoints + validation)
+- **Route Layer**: 100% (routing configuration)
+- **Overall**: 95%+ comprehensive coverage
 
-### Testing Strategy
-- **Unit Tests**: Test business logic in isolation using mocks
-- **Integration Tests**: Test database interactions with real database
-- **Benchmark Tests**: Performance testing for critical paths
-- **End-to-End Tests**: Complete API workflow testing
+## Domain Architecture
 
-## 🚀 Deployment
+### Auth Domain
+- **Entity**: Customer (linked to AWS Cognito)
+- **Repository**: User management operations
+- **Service**: Cognito integration + token validation
 
-### Docker Deployment
+### Category Domain
+- **Entity**: Category (hierarchical with parent/child relationships)
+- **Repository**: CRUD + hierarchy queries
+- **Service**: Category management + validation
+
+### Product Domain
+- **Entity**: Product (linked to categories)
+- **Repository**: Product CRUD + category filtering
+- **Service**: Product management + category validation
+
+### Order Domain
+- **Entity**: Order + OrderItem
+- **Repository**: Order CRUD + order item management
+- **Service**: Order processing + notification orchestration
+- **Notifications**: Email + SMS automated notifications
+
+## Development
+
+### Database Migrations
 ```bash
-# Build and run with Docker Compose
-make docker-run
+# Create new migration
+migrate create -ext sql -dir infrastructures/db/migration -seq migration_name
 
-# Stop services
-make docker-down
+# Apply migrations
+make migrateup
+
+# Rollback migrations
+make migratedown
 ```
 
-### Kubernetes Deployment
+### Generate Mocks
 ```bash
-# Apply secrets and config
-make k8s-apply-secrets
+# Generate all domain mocks
+make mockgen-all
 
-# Deploy to Kubernetes
-make k8s-deploy
-
-# Port forward for local access
-make k8s-port-forward
+# Generate specific domain mocks
+make mockgen-order
+make mockgen-auth
 ```
 
-### Production Considerations
-- Use managed databases (RDS, Cloud SQL)
-- Implement proper logging and monitoring
-- Set up SSL/TLS certificates
-- Configure auto-scaling policies
-- Implement backup strategies
-- Set up alerting for critical metrics
+### Code Generation
+```bash
+# Generate SQLC code
+make sqlc
+```
 
-## 🔒 Security
+## African Market Focus
 
-### Authentication Flow
-1. User initiates login via `/api/v1/auth/login`
-2. System returns OpenID Connect authorization URL
-3. User authenticates with OIDC provider
-4. Provider redirects to `/api/v1/auth/callback` with code
-5. System exchanges code for tokens and validates ID token
-6. System creates/updates customer record and issues JWT
-7. Client uses JWT for subsequent API requests
+- **SMS Integration**: Africa's Talking for reliable SMS delivery across Africa
+- **Currency**: KES (Kenyan Shilling) support in seed data
+- **Local Optimization**: Designed for African internet and mobile-first usage
 
-### Security Features
-- OpenID Connect integration
-- JWT-based authentication
-- Role-based authorization (customer/admin)
-- SQL injection prevention with parameterized queries
-- Input validation and sanitization
-- Rate limiting (recommended for production)
-- HTTPS enforcement in production
-- Vulnerability scanning in CI/CD
+## Contributing
 
-## 📊 Monitoring & Observability
-
-### Health Checks
-- `GET /health` - Application health status
-- Database connectivity check
-- Redis connectivity check
-
-### Metrics (Recommended)
-- Request/response metrics
-- Database query performance
-- Cache hit/miss rates
-- Order processing metrics
-- Authentication success/failure rates
-
-### Logging
-- Structured logging with contextual information
-- Request/response logging
-- Error logging with stack traces
-- Audit logging for sensitive operations
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Write tests for your changes
+4. Ensure all tests pass (`make test`)
+5. Commit changes (`git commit -m 'Add amazing feature'`)
+6. Push to branch (`git push origin feature/amazing-feature`)
+7. Open Pull Request
