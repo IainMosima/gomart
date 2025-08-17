@@ -59,3 +59,19 @@ type LoginResponseDTO struct {
 	State    string `json:"state"`
 	Message  string `json:"message"`
 }
+
+type OrderResponseDTO struct {
+	OrderID     uuid.UUID `json:"order_id"`
+	CustomerID  uuid.UUID `json:"customer_id"`
+	OrderNumber string    `json:"order_number"`
+	Status      string    `json:"status"`
+	TotalAmount float64   `json:"total_amount"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type OrderStatusResponseDTO struct {
+	OrderID     uuid.UUID `json:"order_id"`
+	OrderNumber string    `json:"order_number"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+}

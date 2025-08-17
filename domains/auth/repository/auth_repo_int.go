@@ -6,10 +6,11 @@ import (
 	"context"
 
 	"github.com/IainMosima/gomart/domains/auth/entity"
+	"github.com/google/uuid"
 )
 
 type AuthRepository interface {
 	CreateUser(ctx context.Context, customer *entity.Customer) (*entity.Customer, error)
 	GetUserByEmail(ctx context.Context, email string) (*entity.Customer, error)
-	GetUserByID(ctx context.Context, id string) (*entity.Customer, error)
+	GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.Customer, error)
 }

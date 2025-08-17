@@ -51,7 +51,7 @@ func (a *AuthServiceImpl) HandleCallback(ctx context.Context, req *schema.Handle
 		return nil, fmt.Errorf("failed to validate access token: %w", err)
 	}
 
-	_, err = a.authRepo.GetUserByID(ctx, userInfo.Email)
+	_, err = a.authRepo.GetUserByID(ctx, userInfo.UserID)
 	if err != nil {
 		_, err := a.authRepo.CreateUser(ctx, &entity.Customer{
 			UserID:      userInfo.UserID,

@@ -10,6 +10,7 @@ import (
 
 	entity "github.com/IainMosima/gomart/domains/auth/entity"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockAuthRepository is a mock of AuthRepository interface.
@@ -66,16 +67,16 @@ func (mr *MockAuthRepositoryMockRecorder) GetUserByEmail(ctx, email interface{})
 }
 
 // GetUserByID mocks base method.
-func (m *MockAuthRepository) GetUserByID(ctx context.Context, id string) (*entity.Customer, error) {
+func (m *MockAuthRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*entity.Customer, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByID", ctx, id)
+	ret := m.ctrl.Call(m, "GetUserByID", ctx, userID)
 	ret0, _ := ret[0].(*entity.Customer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserByID indicates an expected call of GetUserByID.
-func (mr *MockAuthRepositoryMockRecorder) GetUserByID(ctx, id interface{}) *gomock.Call {
+func (mr *MockAuthRepositoryMockRecorder) GetUserByID(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockAuthRepository)(nil).GetUserByID), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockAuthRepository)(nil).GetUserByID), ctx, userID)
 }
