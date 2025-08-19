@@ -3,8 +3,10 @@ package routes
 import (
 	"testing"
 
+	authService "github.com/IainMosima/gomart/domains/auth/service"
 	"github.com/IainMosima/gomart/domains/order/service"
 	"github.com/IainMosima/gomart/rest-server/handlers/order"
+	"github.com/IainMosima/gomart/rest-server/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -15,12 +17,14 @@ func TestSetupOrderRoutes(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockService := service.NewMockOrderService(ctrl)
+	mockAuthService := authService.NewMockAuthService(ctrl)
 	handler := order.NewOrderHandler(mockService)
+	authMiddleware := middleware.NewAuthMiddleware(mockAuthService)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
-	SetupOrderRoutes(router, handler)
+	SetupOrderRoutes(router, handler, authMiddleware)
 
 	routes := router.Routes()
 
@@ -53,13 +57,15 @@ func TestSetupOrderRoutes_HandlerIntegration(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockService := service.NewMockOrderService(ctrl)
+	mockAuthService := authService.NewMockAuthService(ctrl)
 	handler := order.NewOrderHandler(mockService)
+	authMiddleware := middleware.NewAuthMiddleware(mockAuthService)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
 	assert.NotPanics(t, func() {
-		SetupOrderRoutes(router, handler)
+		SetupOrderRoutes(router, handler, authMiddleware)
 	}, "SetupOrderRoutes should not panic with valid inputs")
 
 	routes := router.Routes()
@@ -68,12 +74,18 @@ func TestSetupOrderRoutes_HandlerIntegration(t *testing.T) {
 }
 
 func TestSetupOrderRoutes_NilHandler(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockAuthService := authService.NewMockAuthService(ctrl)
+	authMiddleware := middleware.NewAuthMiddleware(mockAuthService)
+
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
 	// This should panic when trying to access nil handler methods
 	assert.Panics(t, func() {
-		SetupOrderRoutes(router, nil)
+		SetupOrderRoutes(router, nil, authMiddleware)
 	}, "SetupOrderRoutes should panic with nil handler")
 }
 
@@ -82,12 +94,14 @@ func TestSetupOrderRoutes_RouteGrouping(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockService := service.NewMockOrderService(ctrl)
+	mockAuthService := authService.NewMockAuthService(ctrl)
 	handler := order.NewOrderHandler(mockService)
+	authMiddleware := middleware.NewAuthMiddleware(mockAuthService)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
-	SetupOrderRoutes(router, handler)
+	SetupOrderRoutes(router, handler, authMiddleware)
 
 	routes := router.Routes()
 
@@ -102,12 +116,14 @@ func TestSetupOrderRoutes_MethodValidation(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockService := service.NewMockOrderService(ctrl)
+	mockAuthService := authService.NewMockAuthService(ctrl)
 	handler := order.NewOrderHandler(mockService)
+	authMiddleware := middleware.NewAuthMiddleware(mockAuthService)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
-	SetupOrderRoutes(router, handler)
+	SetupOrderRoutes(router, handler, authMiddleware)
 
 	routes := router.Routes()
 

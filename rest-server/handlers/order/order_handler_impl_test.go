@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	authSchema "github.com/IainMosima/gomart/domains/auth/schema"
 	"github.com/IainMosima/gomart/domains/order/entity"
 	"github.com/IainMosima/gomart/domains/order/schema"
 	"github.com/IainMosima/gomart/domains/order/service"
@@ -18,6 +19,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
+
+// Helper function to set user in gin context
+func setUserInContext(c *gin.Context, userID uuid.UUID) {
+	user := &authSchema.UserInfoResponse{
+		UserID:        userID,
+		UserName:      "testuser",
+		Email:         "test@example.com",
+		EmailVerified: true,
+		PhoneNumber:   "+1234567890",
+	}
+	c.Set("user", user)
+}
 
 func TestNewOrderHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -47,7 +60,7 @@ func TestOrderHandlerImpl_CreateOrder(t *testing.T) {
 	tests := []struct {
 		name           string
 		requestBody    interface{}
-		setup          func()
+		setup          func(*gin.Context)
 		expectedStatus int
 		expectedBody   interface{}
 	}{
@@ -62,7 +75,10 @@ func TestOrderHandlerImpl_CreateOrder(t *testing.T) {
 					},
 				},
 			},
-			setup: func() {
+			setup: func(c *gin.Context) {
+				// Set authenticated user in context
+				setUserInContext(c, customerID)
+
 				expectedReq := &schema.CreateOrderRequest{
 					CustomerID: customerID,
 					Items: []schema.CreateOrderItemRequest{
@@ -95,9 +111,45 @@ func TestOrderHandlerImpl_CreateOrder(t *testing.T) {
 			},
 		},
 		{
+			name: "user not authenticated",
+			requestBody: dtos.CreateOrderRequestDTO{
+				CustomerID: customerID,
+				Items: []dtos.CreateOrderItemRequestDTO{
+					{
+						ProductID: productID,
+						Quantity:  2,
+					},
+				},
+			},
+			setup: func(c *gin.Context) {
+				// Don't set user in context to simulate unauthenticated request
+			},
+			expectedStatus: http.StatusUnauthorized,
+			expectedBody:   gin.H{"error": "User not authenticated"},
+		},
+		{
+			name: "customer ID mismatch with authenticated user",
+			requestBody: dtos.CreateOrderRequestDTO{
+				CustomerID: customerID,
+				Items: []dtos.CreateOrderItemRequestDTO{
+					{
+						ProductID: productID,
+						Quantity:  2,
+					},
+				},
+			},
+			setup: func(c *gin.Context) {
+				// Set different user ID to simulate unauthorized access
+				differentUserID := uuid.New()
+				setUserInContext(c, differentUserID)
+			},
+			expectedStatus: http.StatusForbidden,
+			expectedBody:   gin.H{"error": "Cannot create order for another customer"},
+		},
+		{
 			name:           "invalid JSON request body",
 			requestBody:    "invalid-json",
-			setup:          func() {},
+			setup:          func(c *gin.Context) {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   gin.H{"error": "invalid character 'i' looking for beginning of value"},
 		},
@@ -112,7 +164,8 @@ func TestOrderHandlerImpl_CreateOrder(t *testing.T) {
 					},
 				},
 			},
-			setup: func() {
+			setup: func(c *gin.Context) {
+				setUserInContext(c, customerID)
 				mockService.EXPECT().
 					CreateOrder(gomock.Any(), gomock.Any()).
 					Return(nil, errors.New("customer not found"))
@@ -126,7 +179,8 @@ func TestOrderHandlerImpl_CreateOrder(t *testing.T) {
 				CustomerID: customerID,
 				Items:      []dtos.CreateOrderItemRequestDTO{},
 			},
-			setup: func() {
+			setup: func(c *gin.Context) {
+				setUserInContext(c, customerID)
 				mockService.EXPECT().
 					CreateOrder(gomock.Any(), gomock.Any()).
 					Return(nil, errors.New("order must contain at least one item"))
@@ -138,8 +192,6 @@ func TestOrderHandlerImpl_CreateOrder(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.setup()
-
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
@@ -152,6 +204,8 @@ func TestOrderHandlerImpl_CreateOrder(t *testing.T) {
 
 			c.Request = httptest.NewRequest(http.MethodPost, "/orders", bytes.NewBuffer(bodyBytes))
 			c.Request.Header.Set("Content-Type", "application/json")
+
+			tt.setup(c)
 
 			handler.(*OrderHandlerImpl).CreateOrder(c)
 
@@ -294,7 +348,7 @@ func TestOrderHandlerImpl_CreateOrder_ValidationCases(t *testing.T) {
 	tests := []struct {
 		name           string
 		requestBody    interface{}
-		setup          func()
+		setup          func(*gin.Context)
 		expectedStatus int
 	}{
 		{
@@ -308,7 +362,8 @@ func TestOrderHandlerImpl_CreateOrder_ValidationCases(t *testing.T) {
 					},
 				},
 			},
-			setup: func() {
+			setup: func(c *gin.Context) {
+				setUserInContext(c, customerID)
 				mockService.EXPECT().
 					CreateOrder(gomock.Any(), gomock.Any()).
 					Return(nil, errors.New("invalid quantity"))
@@ -319,14 +374,14 @@ func TestOrderHandlerImpl_CreateOrder_ValidationCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.setup()
-
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
 			bodyBytes, _ := json.Marshal(tt.requestBody)
 			c.Request = httptest.NewRequest(http.MethodPost, "/orders", bytes.NewBuffer(bodyBytes))
 			c.Request.Header.Set("Content-Type", "application/json")
+
+			tt.setup(c)
 
 			handler.(*OrderHandlerImpl).CreateOrder(c)
 

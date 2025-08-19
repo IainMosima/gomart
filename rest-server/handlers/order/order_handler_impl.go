@@ -6,6 +6,7 @@ import (
 	"github.com/IainMosima/gomart/domains/order/schema"
 	"github.com/IainMosima/gomart/domains/order/service"
 	"github.com/IainMosima/gomart/rest-server/dtos"
+	"github.com/IainMosima/gomart/rest-server/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -24,6 +25,17 @@ func (h *OrderHandlerImpl) CreateOrder(c *gin.Context) {
 	var req dtos.CreateOrderRequestDTO
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, exists := middleware.GetUserFromContext(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	if req.CustomerID != user.UserID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot create order for another customer"})
 		return
 	}
 

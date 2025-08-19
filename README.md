@@ -222,12 +222,6 @@ make mockgen-auth
 make sqlc
 ```
 
-## African Market Focus
-
-- **SMS Integration**: Africa's Talking for reliable SMS delivery across Africa
-- **Currency**: KES (Kenyan Shilling) support in seed data
-- **Local Optimization**: Designed for African internet and mobile-first usage
-
 ## Contributing
 
 1. Fork the repository

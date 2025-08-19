@@ -57,7 +57,7 @@ func main() {
 	orderHandler := order.NewOrderHandler(orderServiceImpl)
 
 	// Initialize REST server
-	server := rest_server.NewRestServer(categoryHandler, productHandler, authHandler, orderHandler)
+	server := rest_server.NewRestServer(categoryHandler, productHandler, authHandler, orderHandler, authServiceImpl)
 
 	// Start HTTP server
 	if err := server.Start(config.HTTPServerAddress); err != nil {

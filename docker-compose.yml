@@ -8,14 +8,17 @@ services:
     container_name: gomart_backend
     ports:
       - "8080:8080"
+    env_file:
+      - configs/app.env
     environment:
-      - HTTP_SERVER_ADDRESS=:8080
+      # Override DB_SOURCE for Docker network
       - DB_SOURCE=postgresql://root:supersecret@postgres:5432/gomart_db?sslmode=disable
     networks:
       - gomart_network
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:14-alpine
@@ -27,10 +30,16 @@ services:
       - POSTGRES_PASSWORD=supersecret
       - POSTGRES_DB=gomart_db
     networks:
-      - gomart_network
+      - gomart_network`
     restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d gomart_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   postgres_data:
