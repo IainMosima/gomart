@@ -11,7 +11,6 @@ services:
     env_file:
       - configs/app.env
     environment:
-      # Override DB_SOURCE for Docker network
       - DB_SOURCE=postgresql://root:supersecret@postgres:5432/gomart_db?sslmode=disable
     networks:
       - gomart_network
@@ -26,9 +25,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=supersecret
-      - POSTGRES_DB=gomart_db
+      - configs/app.env
     networks:
       - gomart_network
     restart: unless-stopped

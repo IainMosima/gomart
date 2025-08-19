@@ -19,38 +19,27 @@ spec:
         image: mosimaiain/gomart:main
         ports:
         - containerPort: 8080
-        env:
-        - name: DB_SOURCE
-          value: "postgresql://root:supersecret@postgres-service:5432/gomart_db?sslmode=disable"
-        - name: HTTP_SERVER_ADDRESS
-          value: ":8080"
-        - name: AWS_REGION
-          value: "ap-northeast-1"
-        - name: COGNITO_CLIENT_ID
-          value: "your-cognito-client-id"
-        - name: COGNITO_CLIENT_SECRET
-          value: "your-cognito-client-secret"
-        - name: COGNITO_REDIRECT_URI
-          value: "http://localhost:8080/cognito/callback"
-        - name: COGNITO_DOMAIN
-          value: "your-cognito-domain.auth.ap-northeast-1.amazoncognito.com"
-        - name: COGNITO_USER_POOL_ID
-          value: "ap-northeast-1_YourPoolId"
-        - name: atApiKeys
-          value: "your-africastalking-api-key"
-        - name: atUsername
-          value: "sandbox"
-        - name: atShortCode
-          value: "15548"
-        - name: atSandbox
-          value: "true"
-        - name: EMAIL_HOST
-          value: "smtp.gmail.com"
-        - name: EMAIL_PORT
-          value: "587"
-        - name: EMAIL_USERNAME
-          value: "your-email@gmail.com"
-        - name: EMAIL_PASSWORD
-          value: "your-app-password"
-        - name: EMAIL_FROM
-          value: "your-email@gmail.com"
+        envFrom:
+        - configMapRef:
+            name: gomart-config
+        - secretRef:
+            name: gomart-secrets
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
