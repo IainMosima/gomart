@@ -44,7 +44,7 @@ func NewRestServer(categoryHandler category.CategoryHandlerInterface, productHan
 }
 
 func (s *RestServer) setupRoutes() {
-	s.router.GET("/health ", func(c *gin.Context) {
+	s.router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "OK",
 			"message": "Server is running",

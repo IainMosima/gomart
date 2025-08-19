@@ -76,4 +76,13 @@ docker-down:
 docker-logs:
 	docker-compose logs -f
 
-.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen mockgen-auth mockgen-category mockgen-product mockgen-customer mockgen-order mockgen-all test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed seed-verify docker-up docker-down docker-logs
+k8s-deploy:
+	kubectl apply -f k8s/
+
+k8s-status:
+	kubectl get deployments,services,pods
+
+k8s-cleanup:
+	kubectl delete -f k8s/
+
+.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen mockgen-auth mockgen-category mockgen-product mockgen-customer mockgen-order mockgen-all test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed seed-verify docker-up docker-down docker-logs k8s-deploy k8s-status k8s-cleanup
