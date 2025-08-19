@@ -39,20 +39,14 @@ func (e *EmailNotificationServiceImpl) SendEmail(ctx context.Context, order *sch
 
 	to := []string{customer.Email}
 	subject := fmt.Sprintf("Order Confirmation - %s", order.OrderNumber)
-	body := fmt.Sprintf(`
-	Dear Customer,
-
-	Your order has been received and is being processed.	
-	Order Details:
-	- Order Number: %s
-	- Total Amount: KES %.2f
-	- Status: %s
-	- Date: %s
-
-	Thank you for your business!
-
-	Best regards,
-	Gomart Team`,
+	body := fmt.Sprintf("Admin Notification,\n\n"+
+		"\tA new order has been placed on Gomart.\n"+
+		"\tOrder Details:\n"+
+		"\t- Order Number: %s\n"+
+		"\t- Total Amount: KES %.2f\n"+
+		"\t- Status: %s\n"+
+		"\t- Date: %s\n\n"+
+		"Please review this order in the admin panel.",
 		order.OrderNumber, order.TotalAmount, order.Status, order.CreatedAt.Format("2006-01-02 15:04:05"))
 
 	msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\n\r\n%s", to[0], subject, body)

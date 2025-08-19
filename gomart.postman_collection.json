@@ -1,0 +1,579 @@
+{
+	"info": {
+		"_postman_id": "6d0242d6-2920-495f-81e5-7bcf5923f358",
+		"name": "gomart",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26728711"
+	},
+	"item": [
+		{
+			"name": "categories-domain",
+			"item": [
+				{
+					"name": "create-root-category",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category_name\": \"Electronics\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/categories",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create-child-category",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category_name\": \"television\",\n    \"parent_id\": \"86972395-c648-421c-be5b-f89b749211dd\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/categories",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list-all-categories",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{port}}/categories",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-single-category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{port}} /categories/86972395-c648-421c-be5b-f89b749211dd",
+							"host": [
+								"{{port}} "
+							],
+							"path": [
+								"categories",
+								"86972395-c648-421c-be5b-f89b749211dd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-categories-with-specific-parent",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{port}}/categories?parent_id=86972395-c648-421c-be5b-f89b749211dd",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"categories"
+							],
+							"query": [
+								{
+									"key": "parent_id",
+									"value": "86972395-c648-421c-be5b-f89b749211dd"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "average-product-price",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{port}} /categories/f1e2d3c4-b5a6-9c8d-7e6f-123456789002/average-price",
+							"host": [
+								"{{port}} "
+							],
+							"path": [
+								"categories",
+								"f1e2d3c4-b5a6-9c8d-7e6f-123456789002",
+								"average-price"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "soft-delete-category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{port}} /categories/f1e2d3c4-b5a6-9c8d-7e6f-123456789002",
+							"host": [
+								"{{port}} "
+							],
+							"path": [
+								"categories",
+								"f1e2d3c4-b5a6-9c8d-7e6f-123456789002"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-category",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category_name\": \"Fridges\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/categories/db6b1731-955c-4703-b495-76839467a5f0",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"categories",
+								"db6b1731-955c-4703-b495-76839467a5f0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-category-children",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{port}}/categories/86972395-c648-421c-be5b-f89b749211dd/children",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"categories",
+								"86972395-c648-421c-be5b-f89b749211dd",
+								"children"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "products-domain",
+			"item": [
+				{
+					"name": "create-product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"product_name\": \"iPhone 16\",\n    \"description\": \"Latest iPhone model\",\n    \"price\": 37000.00,\n    \"sku\": \"PHONE-IPHONE16-001\",\n    \"stock_quantity\": 50,\n    \"category_id\": \"f1e2d3c4-b5a6-9c8d-7e6f-123456789002\",\n    \"is_active\": true\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/products",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-product",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"product_name\": \"iPhone 16 pro\",\n    \"description\": \"Latest iPhone model\",\n    \"price\": 376000.00,\n    \"sku\": \"PHONE-IPHONE16PRO-001\",\n    \"stock_quantity\": 50,\n    \"category_id\": \"f1e2d3c4-b5a6-9c8d-7e6f-123456789002\",\n    \"is_active\": true\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/products/6fd91b9d-c990-4b8a-adfd-6d84e51a9423",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"products",
+								"6fd91b9d-c990-4b8a-adfd-6d84e51a9423"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list-products",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{port}}/products",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list-products-with-category-filtering",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{port}}/products/category/f1e2d3c4-b5a6-9c8d-7e6f-123456789014",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"products",
+								"category",
+								"f1e2d3c4-b5a6-9c8d-7e6f-123456789014"
+							],
+							"query": [
+								{
+									"key": "is_active",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "soft-delete-product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{port}}/products/6fd91b9d-c990-4b8a-adfd-6d84e51a9423",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"products",
+								"6fd91b9d-c990-4b8a-adfd-6d84e51a9423"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth-domain",
+			"item": [
+				{
+					"name": "validate-access-token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"access_token\": \"eyJraWQiOiJ3SEk5XC96SGZzdXVRRStyT0FnK25nSFpoN0hYRkdFSGFCTVl3MUZmOHlJZz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI0NzI0MmFlOC1kMGQxLTcwNTEtMWEzOS0wOTUwZmU5ZjAzY2YiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfVFM2NDFMTkl3IiwidmVyc2lvbiI6MiwiY2xpZW50X2lkIjoicTY0YnJzdjdmcjNqNWpncTlwZWIwNjV0YyIsIm9yaWdpbl9qdGkiOiI0MDJmMzMxMi0xMmI1LTQ2MDgtOTFhZC00ZGVlZTI5YWIzOGIiLCJldmVudF9pZCI6ImEyZjJkNjgyLWZmZmMtNDk2Zi1hMDFhLWQyOTgwM2U5ZDMwMCIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoicGhvbmUgb3BlbmlkIGVtYWlsIiwiYXV0aF90aW1lIjoxNzU1NDI5MTI1LCJleHAiOjE3NTU0MzI3MjUsImlhdCI6MTc1NTQyOTEyNSwianRpIjoiZmE2MjMwZjUtODQwNC00ZWJkLWI4MjgtYmJiZWU4NjU2Mjc4IiwidXNlcm5hbWUiOiJpYWlubW9zaW1hIn0.FaxO9FJQJMgB-sB28tC7iJSc2NBA-1dQO1IV-ERdHYdAXw4qZWtPXA_BukTiRCPRp2PbTNHu-fev1X2ON-tN3PFr85MDz2UVaGA9Xx3nUM8RDEi0vum7D5gec4yE9QKqhSGLE7FLk3dr_TyDWHJ4NPDLPUPqNtAgx8wTivPaiSsRuDrTuDB264Ff1Dzae2oxOs49A_EzLpqsQQ7xNwHBARjJFNcOJh_8ulTj3BXwzF_WtHJRVKvdAjcDErwYTrpj1j0lsjyXQ989QE-uwm6H6MvnmRxNOhjjtrf941Xf8xvEdPFieXT5M3i7he89xG66DGJcYWcfLKk4WsB_1TbhrA\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/auth/validate",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"auth",
+								"validate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh-access-token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.kBZXT0u7nz_X4mSu8rKAL9ME0c4g4RXb5tqTD9JxtqRz7r6ple1l6FRmfv2LkE6AR-xCXp_9QT7-NAL9Wx3Qiv6xLbuhowqLSOavJJDakSnE6AJkqo0RmhifCLiq-dUB8PwvUmt9YmzHKMNBcF8tgpu3KucP84A8Cs8MNsTPiCrQjM1q_RXisTqk0nW8c-gt5ynNFT_LnZKLul5DMsIOuRdyh5ksg6wvSRTyZx7voc2bQLnnKGkTjLbMi4HTXxBDoJb7gKcY9i9XF05zkjrM18GcOrswCFNGmY6lGBaEMXza_rItphPjY57IkmTRDTv0-A9l9uaQQLOa-8xYjwOgTw.RDh9VQihr6qQjWDb.T8In1Huvm63kKDrCnJdnKhZctcV57XDkukrxxEjGvXOQXMgjLqOB2Wm7Ybne71khgJtzrqvfy7oBWmkeCJBSLQOj3WtJswonLbMgu_1PnFyYvwYFQK7_Pp9amW3clyAwbr9536vu1-pZKpa7BmEqXgNMD94TceS5kLkGEWf4_o9qc6-v7nLLtOybnVQYR20Nwwrgg_xGbX2555ArR2novtI7AZUQtb28iNhNlmtAPWQ3Fr6ZPGEO43lN15OIAtld-J7iN0Ri55Ml8ELSTsb3kwtl8MELmhztxUmrZKkPyNbCgfuxlyWtBhTC0IREhsWwENBPVQ5awVMCl4UpilqwE8AGePx7rveL-b1BA-UGCbRFEaEuDFvY0_yPe7c_89jN8LajrY0Autl-22zMCvGne-YKagATOXhs03oLkn_NGwKOsJ8K0VyC1EBHSgQoV_Ies_Cw77V6nfitZPguEmM0IGd2hfT8JmVURaDkQ2GAvcS3YSNn4VFDFsWTUHYMPJ6OBrQx-9qImzSdlpucXhmrabKszrSj8MPMP9o6DKP8ZchLxNZz-iFRqQ-eTmwBADi6g2VEYchDA7wzUS_DpT4KdESDtQjQbUG8ETUbbL8l2QNUPnXBKKJRpV9W0y0UB92AcdEfz0yhclQb_5orOFdCwA_ud3K7HxHTKpf1NGhlTfKINQR2KHL_zAkT3lXGNTGqcVcsoAHDtOLKTGSIGhT-wO2uLPyjRjsOl9jh-x2XHyydxLuUoefGwvHtxBX3y8Ugx8BOvADupaSvKU0H_QapBLzpTTwgDlcKomBu1EEDVHOZx1VEu-R-svn_0KQwklv10d8g2xhPv_do1HYbAgW28cm6FO915co7VZg5jHIV8tNot7SyjlumK0Az84AlXTjLmWRtfqd7dftTrdPOXEnWcRehii67KJzaAWK0BdN-Oj2D35j7dChzbozsOfWhqphEsXvyqYcnece_OnxFBKPvMNE8LayauaSKS-wQSdPBCU42FQys4CVzELdeR1FKIeRQvti67JCNsghG_xDRj6OhUTvx4EUmL7RRV1HKQ3WCVX0BCbP9vkVYYsF6E-3GSFLPLU1mDE8DbW1wkQEwwkthGSLKnk239QVzvatvrdz1qJFlaH89I9EQzJWsBAnAJkX3bZvAjuh77rnZquiONoRoSg3e7sw1uUJgUEs6cVSFNZSUXM9L_EH9zg8rMrvA0Ma04tf3PfGGNArCa6uIDP9hOD6q3VEdLRcEG_TYIOn-yBfn9zY6ogIDJEB4g1l1RJ2FlYaRIjUaRTl2Ec3W9i2zRmrWCZ-uq1GjQkc.62x38C7AsN0sCNgb44rO5A\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/auth/refresh",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-login-url",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/auth/login",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							],
+							"query": [
+								{
+									"key": "state",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "order-domain",
+			"item": [
+				{
+					"name": "create-an-order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJraWQiOiJ3SEk5XC96SGZzdXVRRStyT0FnK25nSFpoN0hYRkdFSGFCTVl3MUZmOHlJZz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI0NzI0MmFlOC1kMGQxLTcwNTEtMWEzOS0wOTUwZmU5ZjAzY2YiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfVFM2NDFMTkl3IiwidmVyc2lvbiI6MiwiY2xpZW50X2lkIjoicTY0YnJzdjdmcjNqNWpncTlwZWIwNjV0YyIsIm9yaWdpbl9qdGkiOiI0MDJmMzMxMi0xMmI1LTQ2MDgtOTFhZC00ZGVlZTI5YWIzOGIiLCJldmVudF9pZCI6ImEyZjJkNjgyLWZmZmMtNDk2Zi1hMDFhLWQyOTgwM2U5ZDMwMCIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoicGhvbmUgb3BlbmlkIGVtYWlsIiwiYXV0aF90aW1lIjoxNzU1NDI5MTI1LCJleHAiOjE3NTU0MzI3MjUsImlhdCI6MTc1NTQyOTEyNSwianRpIjoiZmE2MjMwZjUtODQwNC00ZWJkLWI4MjgtYmJiZWU4NjU2Mjc4IiwidXNlcm5hbWUiOiJpYWlubW9zaW1hIn0.FaxO9FJQJMgB-sB28tC7iJSc2NBA-1dQO1IV-ERdHYdAXw4qZWtPXA_BukTiRCPRp2PbTNHu-fev1X2ON-tN3PFr85MDz2UVaGA9Xx3nUM8RDEi0vum7D5gec4yE9QKqhSGLE7FLk3dr_TyDWHJ4NPDLPUPqNtAgx8wTivPaiSsRuDrTuDB264Ff1Dzae2oxOs49A_EzLpqsQQ7xNwHBARjJFNcOJh_8ulTj3BXwzF_WtHJRVKvdAjcDErwYTrpj1j0lsjyXQ989QE-uwm6H6MvnmRxNOhjjtrf941Xf8xvEdPFieXT5M3i7he89xG66DGJcYWcfLKk4WsB_1TbhrA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n    \"customer_id\": \"47242ae8-d0d1-7051-1a39-0950fe9f03cf\",\n    \"items\": [\n      {\n        \"product_id\": \"a1000000-1111-2222-3333-444444444006\",\n        \"quantity\": 1\n      }\n    ]\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/orders",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-order-status",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{port}}/orders/:id/status",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"orders",
+								":id",
+								"status"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{port}}/health",
+					"host": [
+						"{{port}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "port",
+			"value": "http://localhost:8080"
+		}
+	]
+}

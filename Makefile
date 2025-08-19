@@ -67,4 +67,13 @@ seed: seed-categories seed-products
 seed-verify:
 	psql postgres://root:supersecret@localhost:5432/gomart_db -c "SELECT 'Categories' as type, COUNT(*)::text as count FROM categories WHERE is_deleted = FALSE UNION ALL SELECT 'Products' as type, COUNT(*)::text as count FROM products WHERE is_deleted = FALSE UNION ALL SELECT 'Price Range' as type, CONCAT('KES ', MIN(price), ' - ', MAX(price)) as count FROM products WHERE is_deleted = FALSE;"
 
-.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen mockgen-auth mockgen-category mockgen-product mockgen-customer mockgen-order mockgen-all test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed seed-verify
+docker-up:
+	docker-compose up --build -d
+
+docker-down:
+	docker-compose down
+
+docker-logs:
+	docker-compose logs -f
+
+.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen mockgen-auth mockgen-category mockgen-product mockgen-customer mockgen-order mockgen-all test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed seed-verify docker-up docker-down docker-logs

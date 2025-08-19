@@ -30,7 +30,7 @@ services:
       - POSTGRES_PASSWORD=supersecret
       - POSTGRES_DB=gomart_db
     networks:
-      - gomart_network`
+      - gomart_network
     restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data

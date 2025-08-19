@@ -1,233 +1,231 @@
 # GoMart
 
-A domain-driven Go backend service for African e-commerce, featuring hierarchical product categories, order processing with automated notifications, and AWS Cognito authentication.
+GoMart is a Go backend service designed for African e-commerce. It supports hierarchical product categories, order processing with automated notifications, and AWS Cognito authentication.
 
 ## Architecture
 
-GoMart follows **Domain-Driven Design (DDD)** principles with clean architecture:
+The project follows Domain-Driven Design (DDD) and clean architecture:
 
 ```
-├── domains/                 # Business domains (DDD)
-│   ├── auth/               # Customer authentication & management
-│   ├── category/           # Hierarchical product categories
-│   ├── product/            # Product catalog management
+├── domains/                 # Business domains
+│   ├── auth/               # Authentication & customer management
+│   ├── category/           # Product categories (hierarchical)
+│   ├── product/            # Product catalog
 │   └── order/              # Order processing & notifications
-├── infrastructures/        # External concerns
+├── infrastructures/        # External systems
 │   ├── db/                 # Database layer (PostgreSQL + SQLC)
 │   └── repository/         # Repository implementations
-├── services/               # Application services (business logic)
+├── services/               # Business logic services
 ├── rest-server/            # HTTP layer (Gin framework)
-│   ├── handlers/           # HTTP request handlers
+│   ├── handlers/           # Request handlers
 │   ├── routes/             # Route definitions
 │   └── dtos/               # Data transfer objects
-└── configs/                # Configuration management
+└── configs/                # Configuration files and environment variables
 ```
 
 ## Features
 
-### Core Domains
-- **Authentication**: AWS Cognito integration with customer management
-- **Categories**: Unlimited-depth hierarchical product categorization
-- **Products**: Complete product catalog with category relationships
-- **Orders**: Order processing with automated email + SMS notifications
+- AWS Cognito for authentication
+- Unlimited-depth product categories
+- Product catalog linked to categories
+- Order processing with email and SMS notifications
+- PostgreSQL database with SQLC for type-safe queries
+- Email (SMTP) and SMS (Africa's Talking) notifications
+- RESTful JSON API
 
-### Technical Features
-- **Database**: PostgreSQL with SQLC for type-safe queries
-- **Notifications**: Email (SMTP) + SMS (Africa's Talking) for African markets
-- **Testing**: 95%+ test coverage with comprehensive mocking
-- **Architecture**: Clean DDD with interface segregation
-- **API**: RESTful endpoints with JSON responses
+## Getting Started
 
-## Quick Start
+### Requirements
 
-### Prerequisites
 - Go 1.24+
-- PostgreSQL 14+
-- AWS Cognito (for authentication)
-- Africa's Talking account (for SMS)
+- Docker & Docker Compose (recommended) or PostgreSQL 14+
+- AWS Cognito account
+- Africa's Talking account for SMS
 
-### 1. Environment Setup
+### Setup
+
+1. Clone the repository and copy environment variables:
 
 ```bash
-# Clone repository
 git clone https://github.com/IainMosima/gomart.git
 cd gomart
-
-# Copy environment template
 cp configs/app.env.example configs/app.env
 ```
 
-### 2. Configure Environment
+2. Edit `configs/app.env` with your credentials and settings.
 
-Copy the example and customize with your values:
-
-```bash
-cp configs/app.env.example configs/app.env
-```
-
-Edit `configs/app.env`:
-
-```env
-# Database
-DB_SOURCE=postgresql://root:supersecret@127.0.0.1:5432/gomart_db?sslmode=disable
-HTTP_SERVER_ADDRESS=:8080
-
-# AWS Cognito
-AWS_REGION=ap-northeast-1
-COGNITO_CLIENT_ID=your-client-id
-COGNITO_CLIENT_SECRET=your-client-secret
-COGNITO_REDIRECT_URI=http://localhost:8080/cognito/callback
-COGNITO_DOMAIN=your-cognito-domain.auth.region.amazoncognito.com
-COGNITO_USER_POOL_ID=your-user-pool-id
-
-# Africa's Talking SMS
-atApiKeys=your-api-key
-atUsername=sandbox
-atShortCode=15548
-atSandbox=true
-
-# Email SMTP
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USERNAME=your-email@gmail.com
-EMAIL_PASSWORD=your-app-password
-EMAIL_FROM=your-email@gmail.com
-```
-
-### 3. Database Setup
+3. Start the database and apply migrations:
 
 ```bash
-# Start PostgreSQL
 make postgres
-
-# Create database
 make createdb
-
-# Run migrations
 make migrateup
-
-# (Optional) Seed test data
+# Optional: seed test data
 make seed
 ```
 
-### 4. Run Application
+### Running the Application
+
+- Using Docker:
 
 ```bash
-# Start server
-go run main.go
+make docker-up
+make docker-logs
+make docker-down
+```
 
-# Or use make command
+- Manually:
+
+```bash
+go run main.go
+# Or run tests and then start
 make test && go run main.go
 ```
 
-API will be available at `http://localhost:8080`
+Access the API at `http://localhost:8080`.
 
-## API Overview
+## API Examples
 
 ### Authentication
-- `GET /auth/login` - Get Cognito authorization URL
-- `GET /cognito/callback` - Handle Cognito callback
-- `POST /auth/validate` - Validate access token
-- `POST /auth/refresh` - Refresh access token
 
-### Categories (Hierarchical)
-- `GET /categories` - List categories (supports `parent_id` filter)
-- `POST /categories` - Create category
-- `GET /categories/:id` - Get category details
-- `PUT /categories/:id` - Update category
-- `DELETE /categories/:id` - Delete category
+```bash
+GET /auth/login
+
+POST /auth/validate
+{
+  "access_token": "your-access-token"
+}
+
+POST /auth/refresh
+{
+  "refresh_token": "your-refresh-token"
+}
+```
+
+### Categories
+
+```bash
+POST /categories
+{
+  "category_name": "Electronics"
+}
+
+POST /categories
+{
+  "category_name": "Television",
+  "parent_id": "parent-category-id"
+}
+
+GET /categories
+
+GET /categories?parent_id=parent-category-id
+
+PUT /categories/category-id
+{
+  "category_name": "Fridges"
+}
+```
 
 ### Products
-- `GET /products` - List all products
-- `POST /products` - Create product
-- `GET /products/:id` - Get product details
-- `PUT /products/:id` - Update product
-- `DELETE /products/:id` - Delete product
-- `GET /products/category/:categoryId` - Get products by category
+
+```bash
+POST /products
+{
+  "product_name": "iPhone 16",
+  "description": "Latest iPhone model",
+  "price": 37000.00,
+  "sku": "PHONE-IPHONE16-001",
+  "stock_quantity": 50,
+  "category_id": "category-id",
+  "is_active": true
+}
+
+GET /products
+
+GET /products/category/category-id
+
+PUT /products/product-id
+{
+  "product_name": "iPhone 16 Pro",
+  "price": 376000.00,
+  "sku": "PHONE-IPHONE16PRO-001"
+}
+```
 
 ### Orders
-- `POST /orders` - Create order (triggers email + SMS notifications)
-- `GET /orders/:id/status` - Get order status
 
+```bash
+POST /orders
+Authorization: Bearer your-auth-token
+{
+  "customer_id": "customer-id",
+  "items": [
+    {
+      "product_id": "product-id",
+      "quantity": 1
+    }
+  ]
+}
+
+GET /orders/order-id/status
+```
+
+### Health Check
+
+```bash
+GET /health
+```
 
 ## Testing
 
+Run all tests:
+
 ```bash
-# Run all tests
 make test
-
-# Run with coverage
-make test-coverage
-
-# Generate HTML coverage report
-make test-coverage-html
 ```
 
-### Test Coverage
-- **Service Layer**: 100% (business logic + error scenarios)
-- **Handler Layer**: 95% (HTTP endpoints + validation)
-- **Route Layer**: 100% (routing configuration)
-- **Overall**: 95%+ comprehensive coverage
+Run tests with coverage:
 
-## Domain Architecture
+```bash
+make test-coverage
+```
 
-### Auth Domain
-- **Entity**: Customer (linked to AWS Cognito)
-- **Repository**: User management operations
-- **Service**: Cognito integration + token validation
+Generate HTML coverage report:
 
-### Category Domain
-- **Entity**: Category (hierarchical with parent/child relationships)
-- **Repository**: CRUD + hierarchy queries
-- **Service**: Category management + validation
-
-### Product Domain
-- **Entity**: Product (linked to categories)
-- **Repository**: Product CRUD + category filtering
-- **Service**: Product management + category validation
-
-### Order Domain
-- **Entity**: Order + OrderItem
-- **Repository**: Order CRUD + order item management
-- **Service**: Order processing + notification orchestration
-- **Notifications**: Email + SMS automated notifications
+```bash
+make test-coverage-html
+```
 
 ## Development
 
 ### Database Migrations
+
 ```bash
-# Create new migration
 migrate create -ext sql -dir infrastructures/db/migration -seq migration_name
-
-# Apply migrations
 make migrateup
-
-# Rollback migrations
 make migratedown
 ```
 
 ### Generate Mocks
-```bash
-# Generate all domain mocks
-make mockgen-all
 
-# Generate specific domain mocks
+```bash
+make mockgen-all
 make mockgen-order
 make mockgen-auth
 ```
 
 ### Code Generation
+
 ```bash
-# Generate SQLC code
 make sqlc
 ```
 
 ## Contributing
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature-name`)
 3. Write tests for your changes
-4. Ensure all tests pass (`make test`)
-5. Commit changes (`git commit -m 'Add amazing feature'`)
-6. Push to branch (`git push origin feature/amazing-feature`)
-7. Open Pull Request
+4. Run tests (`make test`)
+5. Commit your changes (`git commit -m 'Add feature'`)
+6. Push to your branch (`git push origin feature-name`)
+7. Open a Pull Request
