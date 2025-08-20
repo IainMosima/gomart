@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	schema "github.com/IainMosima/gomart/domains/order/schema"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockNotificationService is a mock of NotificationService interface.

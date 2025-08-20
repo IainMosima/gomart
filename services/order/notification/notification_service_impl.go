@@ -45,8 +45,7 @@ func (e *EmailNotificationServiceImpl) SendEmail(ctx context.Context, order *sch
 		"\t- Order Number: %s\n"+
 		"\t- Total Amount: KES %.2f\n"+
 		"\t- Status: %s\n"+
-		"\t- Date: %s\n\n"+
-		"Please review this order in the admin panel.",
+		"\t- Date: %s\n\n",
 		order.OrderNumber, order.TotalAmount, order.Status, order.CreatedAt.Format("2006-01-02 15:04:05"))
 
 	msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\n\r\n%s", to[0], subject, body)
