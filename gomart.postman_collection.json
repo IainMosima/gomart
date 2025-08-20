@@ -355,6 +355,31 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "get-single-product-details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{port}}/products/a1000000-1111-2222-3333-444444444002",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"products",
+								"a1000000-1111-2222-3333-444444444002"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -465,7 +490,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJraWQiOiJ3SEk5XC96SGZzdXVRRStyT0FnK25nSFpoN0hYRkdFSGFCTVl3MUZmOHlJZz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI0NzI0MmFlOC1kMGQxLTcwNTEtMWEzOS0wOTUwZmU5ZjAzY2YiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfVFM2NDFMTkl3IiwidmVyc2lvbiI6MiwiY2xpZW50X2lkIjoicTY0YnJzdjdmcjNqNWpncTlwZWIwNjV0YyIsIm9yaWdpbl9qdGkiOiI0MDJmMzMxMi0xMmI1LTQ2MDgtOTFhZC00ZGVlZTI5YWIzOGIiLCJldmVudF9pZCI6ImEyZjJkNjgyLWZmZmMtNDk2Zi1hMDFhLWQyOTgwM2U5ZDMwMCIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoicGhvbmUgb3BlbmlkIGVtYWlsIiwiYXV0aF90aW1lIjoxNzU1NDI5MTI1LCJleHAiOjE3NTU0MzI3MjUsImlhdCI6MTc1NTQyOTEyNSwianRpIjoiZmE2MjMwZjUtODQwNC00ZWJkLWI4MjgtYmJiZWU4NjU2Mjc4IiwidXNlcm5hbWUiOiJpYWlubW9zaW1hIn0.FaxO9FJQJMgB-sB28tC7iJSc2NBA-1dQO1IV-ERdHYdAXw4qZWtPXA_BukTiRCPRp2PbTNHu-fev1X2ON-tN3PFr85MDz2UVaGA9Xx3nUM8RDEi0vum7D5gec4yE9QKqhSGLE7FLk3dr_TyDWHJ4NPDLPUPqNtAgx8wTivPaiSsRuDrTuDB264Ff1Dzae2oxOs49A_EzLpqsQQ7xNwHBARjJFNcOJh_8ulTj3BXwzF_WtHJRVKvdAjcDErwYTrpj1j0lsjyXQ989QE-uwm6H6MvnmRxNOhjjtrf941Xf8xvEdPFieXT5M3i7he89xG66DGJcYWcfLKk4WsB_1TbhrA",
+									"value": "eyJraWQiOiJ3SEk5XC96SGZzdXVRRStyT0FnK25nSFpoN0hYRkdFSGFCTVl3MUZmOHlJZz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhNzg0OWEzOC01MGMxLTcwNzYtZTVhZC1lMTIyN2M0MDVlYjUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfVFM2NDFMTkl3IiwidmVyc2lvbiI6MiwiY2xpZW50X2lkIjoicTY0YnJzdjdmcjNqNWpncTlwZWIwNjV0YyIsIm9yaWdpbl9qdGkiOiI4YWE5MDVlMC1kZmJhLTRkMGMtODkyNC0yMmQ5NmEyOGUxNTAiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6InBob25lIG9wZW5pZCBlbWFpbCIsImF1dGhfdGltZSI6MTc1NTY3MTQ5MSwiZXhwIjoxNzU1Njc1MDkxLCJpYXQiOjE3NTU2NzE0OTEsImp0aSI6IjA3OGVkYjgyLWUxZTYtNDBhNi04ODViLWE1NTkzOWM0Yjg2NCIsInVzZXJuYW1lIjoiaWFpbm1vc2ltYSJ9.HC7ZOuKw7EXYE0SABioi4Z3MRDV_saVbIcK2TyPPxMzl8ryFJheT41v9Z3pQmdByXTiR2r8aJSiyEuC6dOQji-oKfk4XqLBTJvJy_aZ3VqXjzUsu8twhJ2E5ocpxYsv6PGZr_yTdwjEU4hocQU3RtGTOK3FZuYmQRkRW1VxasY8jkxr-QBHI8yDasAc4n6-IjVn3gz6bqmnS3D_wqjRkThMsWpnIC78u3rZRd99fDfQ6zfTjC2M9a4A0kdejS8kJvn5_kzTKm66gBRQCylh0-sTUN-dJ7jfaFDAncyR2S2L1SUUTE05IXH8fl8TGVDqs2b1nZNG9NlL-tVF-AeiIWQ",
 									"type": "string"
 								}
 							]
@@ -474,7 +499,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": " {\n    \"customer_id\": \"47242ae8-d0d1-7051-1a39-0950fe9f03cf\",\n    \"items\": [\n      {\n        \"product_id\": \"a1000000-1111-2222-3333-444444444006\",\n        \"quantity\": 1\n      }\n    ]\n  }",
+							"raw": " {\n    \"customer_id\": \"a7849a38-50c1-7076-e5ad-e1227c405eb5\",\n    \"items\": [\n      {\n        \"product_id\": \"a1000000-1111-2222-3333-444444444023\",\n        \"quantity\": 1\n      }\n    ]\n  }",
 							"options": {
 								"raw": {
 									"language": "json"

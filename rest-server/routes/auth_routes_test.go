@@ -6,8 +6,8 @@ import (
 	"github.com/IainMosima/gomart/domains/auth/service"
 	"github.com/IainMosima/gomart/rest-server/handlers/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestSetupAuthRoutes(t *testing.T) {

@@ -15,9 +15,9 @@ import (
 	"github.com/IainMosima/gomart/domains/order/service"
 	"github.com/IainMosima/gomart/rest-server/dtos"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 // Helper function to set user in gin context

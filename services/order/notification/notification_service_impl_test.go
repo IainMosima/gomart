@@ -11,9 +11,9 @@ import (
 	authRepo "github.com/IainMosima/gomart/domains/auth/repository"
 	"github.com/IainMosima/gomart/domains/order/entity"
 	"github.com/IainMosima/gomart/domains/order/schema"
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestNewNotificationServiceImpl(t *testing.T) {

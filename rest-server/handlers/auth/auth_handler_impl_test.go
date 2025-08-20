@@ -12,9 +12,9 @@ import (
 	"github.com/IainMosima/gomart/domains/auth/service"
 	"github.com/IainMosima/gomart/rest-server/dtos"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestAuthHandlerImpl_LoginHandler_Success(t *testing.T) {

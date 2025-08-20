@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>handlers: Go Coverage Report</title>
+		<title>auth: Go Coverage Report</title>
 		<style>
 			body {
 				background: black;
@@ -55,19 +55,9 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/IainMosima/gomart/rest-server/handlers/category_handler_impl.go (98.0%)</option>
+				<option value="file0">github.com/IainMosima/gomart/services/auth/auth_service_impl.go (96.3%)</option>
 				
-				<option value="file1">github.com/IainMosima/gomart/rest-server/handlers/product_handler_impl.go (94.7%)</option>
-				
-				<option value="file2">github.com/IainMosima/gomart/rest-server/routes/category_routes.go (100.0%)</option>
-				
-				<option value="file3">github.com/IainMosima/gomart/rest-server/routes/product_routes.go (100.0%)</option>
-				
-				<option value="file4">github.com/IainMosima/gomart/rest-server/server.go (0.0%)</option>
-				
-				<option value="file5">github.com/IainMosima/gomart/services/category/category_service_impl.go (100.0%)</option>
-				
-				<option value="file6">github.com/IainMosima/gomart/services/product/product_service_impl.go (80.2%)</option>
+				<option value="file1">github.com/IainMosima/gomart/services/auth/cognitio_service_impl.go (56.9%)</option>
 				
 				</select>
 			</div>
@@ -81,938 +71,275 @@
 		</div>
 		<div id="content">
 		
-		<pre class="file" id="file0" style="display: none">package handlers
-
-import (
-        "net/http"
-
-        "github.com/IainMosima/gomart/domains/category/schema"
-        "github.com/IainMosima/gomart/domains/category/service"
-        "github.com/IainMosima/gomart/rest-server/dtos"
-        "github.com/gin-gonic/gin"
-        "github.com/google/uuid"
-)
-
-type CategoryHandlerImpl struct {
-        categoryService service.CategoryService
-}
-
-func NewCategoryHandler(categoryService service.CategoryService) CategoryHandlerInterface <span class="cov8" title="1">{
-        return &amp;CategoryHandlerImpl{
-                categoryService: categoryService,
-        }
-}</span>
-
-func (h *CategoryHandlerImpl) CreateCategory(c *gin.Context) <span class="cov8" title="1">{
-        var req dtos.CreateCategoryRequestDTO
-        if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">schemaReq := &amp;schema.CreateCategoryRequest{
-                CategoryName: req.CategoryName,
-                ParentID:     req.ParentID,
-        }
-
-        result, err := h.categoryService.CreateCategory(c.Request.Context(), schemaReq)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.CategoryResponseDTO{
-                CategoryID:   result.CategoryID,
-                CategoryName: result.CategoryName,
-                ParentID:     result.ParentID,
-                CreatedAt:    result.CreatedAt,
-                UpdatedAt:    result.UpdatedAt,
-        }
-
-        c.JSON(http.StatusCreated, response)</span>
-}
-
-func (h *CategoryHandlerImpl) GetCategory(c *gin.Context) <span class="cov8" title="1">{
-        categoryIDStr := c.Param("id")
-        categoryID, err := uuid.Parse(categoryIDStr)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
-                return
-        }</span>
-
-        <span class="cov8" title="1">result, err := h.categoryService.GetCategory(c.Request.Context(), categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.CategoryResponseDTO{
-                CategoryID:   result.CategoryID,
-                CategoryName: result.CategoryName,
-                ParentID:     result.ParentID,
-                CreatedAt:    result.CreatedAt,
-                UpdatedAt:    result.UpdatedAt,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}
-
-func (h *CategoryHandlerImpl) UpdateCategory(c *gin.Context) <span class="cov8" title="1">{
-        categoryIDStr := c.Param("id")
-        categoryID, err := uuid.Parse(categoryIDStr)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
-                return
-        }</span>
-
-        <span class="cov8" title="1">var req dtos.UpdateCategoryRequestDTO
-        if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">schemaReq := &amp;schema.UpdateCategoryRequest{
-                CategoryName: req.CategoryName,
-        }
-
-        result, err := h.categoryService.UpdateCategory(c.Request.Context(), categoryID, schemaReq)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.CategoryResponseDTO{
-                CategoryID:   result.CategoryID,
-                CategoryName: result.CategoryName,
-                ParentID:     result.ParentID,
-                CreatedAt:    result.CreatedAt,
-                UpdatedAt:    result.UpdatedAt,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}
-
-func (h *CategoryHandlerImpl) ListCategories(c *gin.Context) <span class="cov8" title="1">{
-        var req dtos.ListCategoriesRequestDTO
-
-        if c.Request.Method == "GET" </span><span class="cov8" title="1">{
-                req.RootOnly = c.Query("root_only") == "true"
-
-                if parentIDStr := c.Query("parent_id"); parentIDStr != "" </span><span class="cov8" title="1">{
-                        parentID, err := uuid.Parse(parentIDStr)
-                        if err != nil </span><span class="cov8" title="1">{
-                                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parent ID format"})
-                                return
-                        }</span>
-                        <span class="cov8" title="1">req.ParentID = &amp;parentID</span>
-                }
-        } else<span class="cov8" title="1"> {
-                if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
-                        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-                        return
-                }</span>
-        }
-
-        <span class="cov8" title="1">schemaReq := &amp;schema.ListCategoriesRequest{
-                ParentID: req.ParentID,
-                RootOnly: req.RootOnly,
-        }
-
-        result, err := h.categoryService.ListCategories(c.Request.Context(), schemaReq)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">categories := make([]*dtos.CategoryResponseDTO, len(result.Categories))
-        for i, cat := range result.Categories </span><span class="cov8" title="1">{
-                categories[i] = &amp;dtos.CategoryResponseDTO{
-                        CategoryID:   cat.CategoryID,
-                        CategoryName: cat.CategoryName,
-                        ParentID:     cat.ParentID,
-                        CreatedAt:    cat.CreatedAt,
-                        UpdatedAt:    cat.UpdatedAt,
-                }
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.CategoryListResponseDTO{
-                Categories: categories,
-                Total:      result.Total,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}
-
-func (h *CategoryHandlerImpl) DeleteCategory(c *gin.Context) <span class="cov8" title="1">{
-        categoryIDStr := c.Param("id")
-        categoryID, err := uuid.Parse(categoryIDStr)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
-                return
-        }</span>
-
-        <span class="cov8" title="1">if err := h.categoryService.DeleteCategory(c.Request.Context(), categoryID); err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">c.JSON(http.StatusNoContent, gin.H{})</span>
-}
-
-func (h *CategoryHandlerImpl) GetCategoryChildren(c *gin.Context) <span class="cov8" title="1">{
-        categoryIDStr := c.Param("id")
-
-        var parentID *uuid.UUID
-        if categoryIDStr != "" </span><span class="cov8" title="1">{
-                id, err := uuid.Parse(categoryIDStr)
-                if err != nil </span><span class="cov8" title="1">{
-                        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
-                        return
-                }</span>
-                <span class="cov8" title="1">parentID = &amp;id</span>
-        }
-
-        <span class="cov8" title="1">result, err := h.categoryService.GetCategoryChildren(c.Request.Context(), parentID)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">categories := make([]*dtos.CategoryResponseDTO, len(result.Categories))
-        for i, cat := range result.Categories </span><span class="cov8" title="1">{
-                categories[i] = &amp;dtos.CategoryResponseDTO{
-                        CategoryID:   cat.CategoryID,
-                        CategoryName: cat.CategoryName,
-                        ParentID:     cat.ParentID,
-                        CreatedAt:    cat.CreatedAt,
-                        UpdatedAt:    cat.UpdatedAt,
-                }
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.CategoryListResponseDTO{
-                Categories: categories,
-                Total:      result.Total,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}
-func (h *CategoryHandlerImpl) GetCategoryAverageProductPrice(c *gin.Context) <span class="cov8" title="1">{
-        categoryIDStr := c.Param("id")
-        categoryID, err := uuid.Parse(categoryIDStr)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
-                return
-        }</span>
-
-        <span class="cov8" title="1">result, err := h.categoryService.GetCategoryAverageProductPrice(c.Request.Context(), categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.CategoryAverageProductPriceResponseDTO{
-                CategoryID:   result.CategoryID,
-                CategoryName: result.CategoryName,
-                AveragePrice: result.AveragePrice,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}
-</pre>
-		
-		<pre class="file" id="file1" style="display: none">package handlers
-
-import (
-        "net/http"
-
-        "github.com/IainMosima/gomart/domains/product/schema"
-        "github.com/IainMosima/gomart/domains/product/service"
-        "github.com/IainMosima/gomart/rest-server/dtos"
-        "github.com/gin-gonic/gin"
-        "github.com/google/uuid"
-)
-
-type ProductHandlerImpl struct {
-        productService service.ProductService
-}
-
-func NewProductHandler(productService service.ProductService) ProductHandlerInterface <span class="cov8" title="1">{
-        return &amp;ProductHandlerImpl{
-                productService: productService,
-        }
-}</span>
-
-func (h *ProductHandlerImpl) CreateProduct(c *gin.Context) <span class="cov8" title="1">{
-        var req dtos.CreateProductRequestDTO
-        if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">schemaReq := &amp;schema.CreateProductRequest{
-                ProductName:   req.ProductName,
-                Description:   req.Description,
-                Price:         req.Price,
-                SKU:           req.SKU,
-                StockQuantity: req.StockQuantity,
-                CategoryID:    req.CategoryID,
-                IsActive:      req.IsActive,
-        }
-
-        result, err := h.productService.CreateProduct(c.Request.Context(), schemaReq)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.ProductResponseDTO{
-                ProductID:     result.ProductID,
-                ProductName:   result.ProductName,
-                Description:   result.Description,
-                Price:         result.Price,
-                SKU:           result.SKU,
-                StockQuantity: result.StockQuantity,
-                CategoryID:    result.CategoryID,
-                IsActive:      result.IsActive,
-                CreatedAt:     result.CreatedAt,
-                UpdatedAt:     result.UpdatedAt,
-        }
-
-        c.JSON(http.StatusCreated, response)</span>
-}
-
-func (h *ProductHandlerImpl) GetProduct(c *gin.Context) <span class="cov8" title="1">{
-        productIDStr := c.Param("id")
-        productID, err := uuid.Parse(productIDStr)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-                return
-        }</span>
-
-        <span class="cov8" title="1">result, err := h.productService.GetProduct(c.Request.Context(), productID)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.ProductResponseDTO{
-                ProductID:     result.ProductID,
-                ProductName:   result.ProductName,
-                Description:   result.Description,
-                Price:         result.Price,
-                SKU:           result.SKU,
-                StockQuantity: result.StockQuantity,
-                CategoryID:    result.CategoryID,
-                IsActive:      result.IsActive,
-                CreatedAt:     result.CreatedAt,
-                UpdatedAt:     result.UpdatedAt,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}
-
-func (h *ProductHandlerImpl) UpdateProduct(c *gin.Context) <span class="cov8" title="1">{
-        productIDStr := c.Param("id")
-        productID, err := uuid.Parse(productIDStr)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-                return
-        }</span>
-
-        <span class="cov8" title="1">var req dtos.UpdateProductRequestDTO
-        if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">schemaReq := &amp;schema.UpdateProductRequest{
-                ProductName:   req.ProductName,
-                Description:   req.Description,
-                Price:         req.Price,
-                StockQuantity: req.StockQuantity,
-                CategoryID:    req.CategoryID,
-                IsActive:      req.IsActive,
-        }
-
-        result, err := h.productService.UpdateProduct(c.Request.Context(), productID, schemaReq)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.ProductResponseDTO{
-                ProductID:     result.ProductID,
-                ProductName:   result.ProductName,
-                Description:   result.Description,
-                Price:         result.Price,
-                SKU:           result.SKU,
-                StockQuantity: result.StockQuantity,
-                CategoryID:    result.CategoryID,
-                IsActive:      result.IsActive,
-                CreatedAt:     result.CreatedAt,
-                UpdatedAt:     result.UpdatedAt,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}
-
-func (h *ProductHandlerImpl) DeleteProduct(c *gin.Context) <span class="cov8" title="1">{
-        productIDStr := c.Param("id")
-        productID, err := uuid.Parse(productIDStr)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-                return
-        }</span>
-
-        <span class="cov8" title="1">if err := h.productService.DeleteProduct(c.Request.Context(), productID); err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">c.JSON(http.StatusNoContent, gin.H{})</span>
-}
-
-func (h *ProductHandlerImpl) ListProducts(c *gin.Context) <span class="cov8" title="1">{
-        var req dtos.ProductSearchRequestDTO
-        if err := c.ShouldBindQuery(&amp;req); err != nil </span><span class="cov0" title="0">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">schemaReq := &amp;schema.ProductSearchRequest{
-                Query:      req.Query,
-                CategoryID: req.CategoryID,
-                IsActive:   req.IsActive,
-                InStock:    req.InStock,
-                Page:       req.Page,
-                Limit:      req.Limit,
-        }
-
-        result, err := h.productService.ListProducts(c.Request.Context(), schemaReq)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">products := make([]*dtos.ProductResponseDTO, len(result.Products))
-        for i, product := range result.Products </span><span class="cov8" title="1">{
-                products[i] = &amp;dtos.ProductResponseDTO{
-                        ProductID:     product.ProductID,
-                        ProductName:   product.ProductName,
-                        Description:   product.Description,
-                        Price:         product.Price,
-                        SKU:           product.SKU,
-                        StockQuantity: product.StockQuantity,
-                        CategoryID:    product.CategoryID,
-                        IsActive:      product.IsActive,
-                        CreatedAt:     product.CreatedAt,
-                        UpdatedAt:     product.UpdatedAt,
-                }
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.ProductListResponseDTO{
-                Products: products,
-                Total:    result.Total,
-                Page:     result.Page,
-                Limit:    result.Limit,
-                HasNext:  result.HasNext,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}
-
-func (h *ProductHandlerImpl) GetProductsByCategory(c *gin.Context) <span class="cov8" title="1">{
-        categoryIDStr := c.Param("categoryId")
-        categoryID, err := uuid.Parse(categoryIDStr)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
-                return
-        }</span>
-
-        <span class="cov8" title="1">result, err := h.productService.GetProductsByCategory(c.Request.Context(), categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-                return
-        }</span>
-
-        <span class="cov8" title="1">products := make([]*dtos.ProductResponseDTO, len(result.Products))
-        for i, product := range result.Products </span><span class="cov8" title="1">{
-                products[i] = &amp;dtos.ProductResponseDTO{
-                        ProductID:     product.ProductID,
-                        ProductName:   product.ProductName,
-                        Description:   product.Description,
-                        Price:         product.Price,
-                        SKU:           product.SKU,
-                        StockQuantity: product.StockQuantity,
-                        CategoryID:    product.CategoryID,
-                        IsActive:      product.IsActive,
-                        CreatedAt:     product.CreatedAt,
-                        UpdatedAt:     product.UpdatedAt,
-                }
-        }</span>
-
-        <span class="cov8" title="1">response := &amp;dtos.ProductListResponseDTO{
-                Products: products,
-                Total:    result.Total,
-                Page:     result.Page,
-                Limit:    result.Limit,
-                HasNext:  result.HasNext,
-        }
-
-        c.JSON(http.StatusOK, response)</span>
-}</pre>
-		
-		<pre class="file" id="file2" style="display: none">package routes
-
-import (
-        "github.com/IainMosima/gomart/rest-server/handlers"
-        "github.com/gin-gonic/gin"
-)
-
-func SetupCategoryRoutes(router *gin.Engine, categoryHandler handlers.CategoryHandlerInterface) <span class="cov8" title="1">{
-        categories := router.Group("/categories")
-        </span><span class="cov8" title="1">{
-                categories.POST("", categoryHandler.CreateCategory)
-                categories.GET("", categoryHandler.ListCategories)
-                categories.GET("/:id", categoryHandler.GetCategory)
-                categories.PUT("/:id", categoryHandler.UpdateCategory)
-                categories.DELETE("/:id", categoryHandler.DeleteCategory)
-                categories.GET("/:id/children", categoryHandler.GetCategoryChildren)
-                categories.GET("/:id/average-price", categoryHandler.GetCategoryAverageProductPrice)
-        }</span>
-}
-</pre>
-		
-		<pre class="file" id="file3" style="display: none">package routes
-
-import (
-        "github.com/IainMosima/gomart/rest-server/handlers"
-        "github.com/gin-gonic/gin"
-)
-
-func SetupProductRoutes(router *gin.Engine, productHandler handlers.ProductHandlerInterface) <span class="cov8" title="1">{
-        products := router.Group("/products")
-        </span><span class="cov8" title="1">{
-                products.POST("", productHandler.CreateProduct)
-                products.GET("", productHandler.ListProducts)
-                products.GET("/:id", productHandler.GetProduct)
-                products.PUT("/:id", productHandler.UpdateProduct)
-                products.DELETE("/:id", productHandler.DeleteProduct)
-                products.GET("/category/:categoryId", productHandler.GetProductsByCategory)
-        }</span>
-}</pre>
-		
-		<pre class="file" id="file4" style="display: none">package rest_server
-
-import (
-        "github.com/IainMosima/gomart/rest-server/handlers"
-        "github.com/IainMosima/gomart/rest-server/routes"
-        "github.com/gin-gonic/gin"
-)
-
-type RestServer struct {
-        router          *gin.Engine
-        categoryHandler handlers.CategoryHandlerInterface
-        productHandler  handlers.ProductHandlerInterface
-}
-
-func NewRestServer(categoryHandler handlers.CategoryHandlerInterface, productHandler handlers.ProductHandlerInterface) *RestServer <span class="cov0" title="0">{
-        router := gin.New()
-
-        _ = router.SetTrustedProxies(nil)
-
-        router.Use(gin.Logger())
-        router.Use(gin.Recovery())
-
-        server := &amp;RestServer{
-                router:          router,
-                categoryHandler: categoryHandler,
-                productHandler:  productHandler,
-        }
-
-        server.setupRoutes()
-        return server
-}</span>
-
-func (s *RestServer) setupRoutes() <span class="cov0" title="0">{
-        routes.SetupCategoryRoutes(s.router, s.categoryHandler)
-        routes.SetupProductRoutes(s.router, s.productHandler)
-}</span>
-
-func (s *RestServer) Start(addr string) error <span class="cov0" title="0">{
-        return s.router.Run(addr)
-}</span>
-</pre>
-		
-		<pre class="file" id="file5" style="display: none">package category
-
-import (
-        "context"
-
-        "github.com/IainMosima/gomart/domains/category/entity"
-        "github.com/IainMosima/gomart/domains/category/repository"
-        "github.com/IainMosima/gomart/domains/category/schema"
-        "github.com/IainMosima/gomart/domains/category/service"
-        "github.com/google/uuid"
-)
-
-type CategoryServiceImpl struct {
-        categoryRepo repository.CategoryRepository
-}
-
-func NewCategoryService(categoryRepo repository.CategoryRepository) service.CategoryService <span class="cov8" title="1">{
-        return &amp;CategoryServiceImpl{
-                categoryRepo: categoryRepo,
-        }
-}</span>
-
-func (s *CategoryServiceImpl) CreateCategory(ctx context.Context, req *schema.CreateCategoryRequest) (*schema.CategoryResponse, error) <span class="cov8" title="1">{
-        category := &amp;entity.Category{
-                CategoryID:   uuid.New(),
-                CategoryName: req.CategoryName,
-                ParentID:     req.ParentID,
-        }
-
-        createdCategory, err := s.categoryRepo.Create(ctx, category)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">return s.entityToResponse(createdCategory), nil</span>
-}
-
-func (s *CategoryServiceImpl) GetCategory(ctx context.Context, categoryID uuid.UUID) (*schema.CategoryResponse, error) <span class="cov8" title="1">{
-        category, err := s.categoryRepo.GetByID(ctx, categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">return s.entityToResponse(category), nil</span>
-}
-
-func (s *CategoryServiceImpl) UpdateCategory(ctx context.Context, categoryID uuid.UUID, req *schema.UpdateCategoryRequest) (*schema.CategoryResponse, error) <span class="cov8" title="1">{
-        existingCategory, err := s.categoryRepo.GetByID(ctx, categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">existingCategory.CategoryName = req.CategoryName
-
-        updatedCategory, err := s.categoryRepo.Update(ctx, existingCategory)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">return s.entityToResponse(updatedCategory), nil</span>
-}
-
-func (s *CategoryServiceImpl) ListCategories(ctx context.Context, req *schema.ListCategoriesRequest) (*schema.CategoryListResponse, error) <span class="cov8" title="1">{
-        var categories []entity.Category
-        var err error
-
-        if req == nil </span><span class="cov8" title="1">{
-                categories, err = s.categoryRepo.GetAll(ctx)
-        }</span> else<span class="cov8" title="1"> if req.RootOnly </span><span class="cov8" title="1">{
-                categories, err = s.categoryRepo.GetRootCategories(ctx)
-        }</span> else<span class="cov8" title="1"> if req.ParentID != nil </span><span class="cov8" title="1">{
-                categories, err = s.categoryRepo.GetByParent(ctx, req.ParentID)
-        }</span> else<span class="cov8" title="1"> {
-                categories, err = s.categoryRepo.GetAll(ctx)
-        }</span>
-
-        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">responses := make([]*schema.CategoryResponse, len(categories))
-        for i, category := range categories </span><span class="cov8" title="1">{
-                responses[i] = s.entityToResponse(&amp;category)
-        }</span>
-
-        <span class="cov8" title="1">return &amp;schema.CategoryListResponse{
-                Categories: responses,
-                Total:      int64(len(responses)),
-        }, nil</span>
-}
-
-func (s *CategoryServiceImpl) GetCategoryChildren(ctx context.Context, parentID *uuid.UUID) (*schema.CategoryListResponse, error) <span class="cov8" title="1">{
-        categories, err := s.categoryRepo.GetByParent(ctx, parentID)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">responses := make([]*schema.CategoryResponse, len(categories))
-        for i, category := range categories </span><span class="cov8" title="1">{
-                responses[i] = s.entityToResponse(&amp;category)
-        }</span>
-
-        <span class="cov8" title="1">return &amp;schema.CategoryListResponse{
-                Categories: responses,
-                Total:      int64(len(responses)),
-        }, nil</span>
-}
-
-func (s *CategoryServiceImpl) DeleteCategory(ctx context.Context, categoryID uuid.UUID) error <span class="cov8" title="1">{
-        _, err := s.categoryRepo.GetByID(ctx, categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-
-        <span class="cov8" title="1">return s.categoryRepo.SoftDelete(ctx, categoryID)</span>
-}
-
-func (s *CategoryServiceImpl) GetCategoryAverageProductPrice(ctx context.Context, categoryID uuid.UUID) (*schema.CategoryAverageProductPriceResponse, error) <span class="cov8" title="1">{
-        category, err := s.categoryRepo.GetByID(ctx, categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">averagePrice, err := s.categoryRepo.GetAverageProductPrice(ctx, categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">return &amp;schema.CategoryAverageProductPriceResponse{
-                CategoryID:   category.CategoryID,
-                CategoryName: category.CategoryName,
-                AveragePrice: averagePrice,
-        }, nil</span>
-}
-
-func (s *CategoryServiceImpl) entityToResponse(category *entity.Category) *schema.CategoryResponse <span class="cov8" title="1">{
-        return &amp;schema.CategoryResponse{
-                CategoryID:   category.CategoryID,
-                CategoryName: category.CategoryName,
-                ParentID:     category.ParentID,
-                CreatedAt:    category.CreatedAt,
-                UpdatedAt:    category.UpdatedAt,
-        }
-}</span>
-</pre>
-		
-		<pre class="file" id="file6" style="display: none">package product
+		<pre class="file" id="file0" style="display: none">package auth
 
 import (
         "context"
         "fmt"
 
-        categoryRepo "github.com/IainMosima/gomart/domains/category/repository"
-        "github.com/IainMosima/gomart/domains/product/entity"
-        "github.com/IainMosima/gomart/domains/product/repository"
-        "github.com/IainMosima/gomart/domains/product/schema"
-        "github.com/IainMosima/gomart/domains/product/service"
-        "github.com/google/uuid"
+        "github.com/IainMosima/gomart/configs"
+        "github.com/IainMosima/gomart/domains/auth/entity"
+        "github.com/IainMosima/gomart/domains/auth/repository"
+        "github.com/IainMosima/gomart/domains/auth/schema"
+        "github.com/IainMosima/gomart/domains/auth/service"
 )
 
-type ProductServiceImpl struct {
-        productRepo  repository.ProductRepository
-        categoryRepo categoryRepo.CategoryRepository
+type AuthServiceImpl struct {
+        cognitoService service.CognitoServiceInterface
+        authRepo       repository.AuthRepository
 }
 
-func NewProductService(productRepo repository.ProductRepository, categoryRepo categoryRepo.CategoryRepository) service.ProductService <span class="cov8" title="1">{
-        return &amp;ProductServiceImpl{
-                productRepo:  productRepo,
-                categoryRepo: categoryRepo,
-        }
-}</span>
-
-func (s *ProductServiceImpl) CreateProduct(ctx context.Context, req *schema.CreateProductRequest) (*schema.ProductResponse, error) <span class="cov8" title="1">{
-        // Validate that category exists
-        _, err := s.categoryRepo.GetByID(ctx, req.CategoryID)
+func NewAuthServiceImpl(cfg *configs.Config, authRepo repository.AuthRepository) (service.AuthService, error) <span class="cov8" title="1">{
+        cognitoService, err := NewCognitoService(cfg)
         if err != nil </span><span class="cov8" title="1">{
-                return nil, fmt.Errorf("category not found: %w", err)
+                return nil, fmt.Errorf("failed to create cognito service: %w", err)
         }</span>
 
-        <span class="cov8" title="1">isActive := true
-        if req.IsActive != nil </span><span class="cov8" title="1">{
-                isActive = *req.IsActive
-        }</span>
-
-        <span class="cov8" title="1">product := &amp;entity.Product{
-                ProductID:     uuid.New(),
-                ProductName:   req.ProductName,
-                Description:   req.Description,
-                Price:         req.Price,
-                SKU:           req.SKU,
-                StockQuantity: req.StockQuantity,
-                CategoryID:    req.CategoryID,
-                IsActive:      isActive,
-        }
-
-        createdProduct, err := s.productRepo.Create(ctx, product)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">return s.entityToResponse(createdProduct), nil</span>
+        <span class="cov0" title="0">return &amp;AuthServiceImpl{
+                cognitoService: cognitoService,
+                authRepo:       authRepo,
+        }, nil</span>
 }
 
-func (s *ProductServiceImpl) GetProduct(ctx context.Context, productID uuid.UUID) (*schema.ProductResponse, error) <span class="cov8" title="1">{
-        product, err := s.productRepo.GetByID(ctx, productID)
+func (a *AuthServiceImpl) GetAuthURL(state string) (string, error) <span class="cov8" title="1">{
+        url, err := a.cognitoService.GetAuthURL(state)
         if err != nil </span><span class="cov8" title="1">{
-                return nil, err
+                return "", fmt.Errorf("failed to get auth url: %w", err)
         }</span>
-
-        <span class="cov8" title="1">return s.entityToResponse(product), nil</span>
+        <span class="cov8" title="1">return url, nil</span>
 }
 
-
-func (s *ProductServiceImpl) UpdateProduct(ctx context.Context, productID uuid.UUID, req *schema.UpdateProductRequest) (*schema.ProductResponse, error) <span class="cov8" title="1">{
-        existingProduct, err := s.productRepo.GetByID(ctx, productID)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, err
+func (a *AuthServiceImpl) HandleCallback(ctx context.Context, req *schema.HandleCallbackRequest) (*schema.TokenResponse, error) <span class="cov8" title="1">{
+        if req.Code == nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("code is required")
         }</span>
 
-        // Validate category if it's being updated
-        <span class="cov8" title="1">if req.CategoryID != nil </span><span class="cov8" title="1">{
-                _, err := s.categoryRepo.GetByID(ctx, *req.CategoryID)
-                if err != nil </span><span class="cov0" title="0">{
-                        return nil, fmt.Errorf("category not found: %w", err)
+        <span class="cov8" title="1">tokenResp, err := a.cognitoService.ExchangeCodeForTokens(ctx, *req.Code)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to exchange code for tokens: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">userInfo, err := a.cognitoService.ValidateAccessToken(ctx, tokenResp.AccessToken)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to validate access token: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">_, err = a.authRepo.GetUserByID(ctx, userInfo.UserID)
+        if err != nil </span><span class="cov8" title="1">{
+                _, err := a.authRepo.CreateUser(ctx, &amp;entity.Customer{
+                        UserID:      userInfo.UserID,
+                        PhoneNumber: userInfo.PhoneNumber,
+                        UserName:    userInfo.UserName,
+                        Email:       userInfo.Email,
+                })
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, fmt.Errorf("failed to create user: %w", err)
                 }</span>
-                <span class="cov8" title="1">existingProduct.CategoryID = *req.CategoryID</span>
         }
 
-        // Update fields if provided
-        <span class="cov8" title="1">if req.ProductName != nil </span><span class="cov8" title="1">{
-                existingProduct.ProductName = *req.ProductName
-        }</span>
+        <span class="cov8" title="1">return tokenResp, nil</span>
 
-        <span class="cov8" title="1">if req.Description != nil </span><span class="cov0" title="0">{
-                existingProduct.Description = req.Description
-        }</span>
-
-        <span class="cov8" title="1">if req.Price != nil </span><span class="cov8" title="1">{
-                existingProduct.Price = *req.Price
-        }</span>
-
-        <span class="cov8" title="1">if req.StockQuantity != nil </span><span class="cov0" title="0">{
-                existingProduct.StockQuantity = *req.StockQuantity
-        }</span>
-
-        <span class="cov8" title="1">if req.IsActive != nil </span><span class="cov0" title="0">{
-                existingProduct.IsActive = *req.IsActive
-        }</span>
-
-        <span class="cov8" title="1">updatedProduct, err := s.productRepo.Update(ctx, existingProduct)
-        if err != nil </span><span class="cov0" title="0">{
-                return nil, err
-        }</span>
-
-        <span class="cov8" title="1">return s.entityToResponse(updatedProduct), nil</span>
 }
 
-func (s *ProductServiceImpl) DeleteProduct(ctx context.Context, productID uuid.UUID) error <span class="cov8" title="1">{
-        // Check if product exists
-        _, err := s.productRepo.GetByID(ctx, productID)
+func (a *AuthServiceImpl) RefreshAccessToken(ctx context.Context, req *schema.RefreshTokenRequest) (*schema.RefreshTokenResponse, error) <span class="cov8" title="1">{
+        tokenResp, err := a.cognitoService.RefreshTokens(ctx, req.RefreshToken)
         if err != nil </span><span class="cov8" title="1">{
-                return err
-        }</span>
-
-        <span class="cov8" title="1">return s.productRepo.SoftDelete(ctx, productID)</span>
-}
-
-func (s *ProductServiceImpl) ListProducts(ctx context.Context, req *schema.ProductSearchRequest) (*schema.ProductListResponse, error) <span class="cov8" title="1">{
-        var products []*entity.Product
-        var err error
-
-        if req != nil &amp;&amp; req.CategoryID != nil </span><span class="cov8" title="1">{
-                products, err = s.productRepo.GetByCategory(ctx, *req.CategoryID)
-        }</span> else<span class="cov8" title="1"> if req != nil &amp;&amp; req.IsActive != nil &amp;&amp; *req.IsActive </span><span class="cov8" title="1">{
-                products, err = s.productRepo.GetActiveProducts(ctx)
-        }</span> else<span class="cov8" title="1"> if req != nil &amp;&amp; req.InStock != nil &amp;&amp; *req.InStock </span><span class="cov0" title="0">{
-                products, err = s.productRepo.GetInStock(ctx)
-        }</span> else<span class="cov8" title="1"> {
-                products, err = s.productRepo.GetAll(ctx)
-        }</span>
-
-        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
 
-        <span class="cov8" title="1">responses := make([]*schema.ProductResponse, len(products))
-        for i, product := range products </span><span class="cov8" title="1">{
-                responses[i] = s.entityToResponse(product)
-        }</span>
-
-        // Apply pagination if specified
-        <span class="cov8" title="1">total := int64(len(responses))
-        if req != nil &amp;&amp; req.Page &gt; 0 &amp;&amp; req.Limit &gt; 0 </span><span class="cov0" title="0">{
-                start := (req.Page - 1) * req.Limit
-                if start &gt;= len(responses) </span><span class="cov0" title="0">{
-                        responses = []*schema.ProductResponse{}
-                }</span> else<span class="cov0" title="0"> {
-                        end := start + req.Limit
-                        if end &gt; len(responses) </span><span class="cov0" title="0">{
-                                end = len(responses)
-                        }</span>
-                        <span class="cov0" title="0">responses = responses[start:end]</span>
-                }
-        }
-
-        <span class="cov8" title="1">hasNext := false
-        if req != nil &amp;&amp; req.Page &gt; 0 &amp;&amp; req.Limit &gt; 0 </span><span class="cov0" title="0">{
-                hasNext = int64((req.Page * req.Limit)) &lt; total
-        }</span>
-
-        <span class="cov8" title="1">page := 1
-        limit := len(responses)
-        if req != nil &amp;&amp; req.Page &gt; 0 </span><span class="cov0" title="0">{
-                page = req.Page
-        }</span>
-        <span class="cov8" title="1">if req != nil &amp;&amp; req.Limit &gt; 0 </span><span class="cov0" title="0">{
-                limit = req.Limit
-        }</span>
-
-        <span class="cov8" title="1">return &amp;schema.ProductListResponse{
-                Products: responses,
-                Total:    total,
-                Page:     page,
-                Limit:    limit,
-                HasNext:  hasNext,
+        <span class="cov8" title="1">return &amp;schema.RefreshTokenResponse{
+                AccessToken: tokenResp.AccessToken,
+                TokenType:   "Bearer",
+                ExpiresIn:   3600,
         }, nil</span>
 }
 
-func (s *ProductServiceImpl) GetProductsByCategory(ctx context.Context, categoryID uuid.UUID) (*schema.ProductListResponse, error) <span class="cov8" title="1">{
-        // Validate that category exists
-        _, err := s.categoryRepo.GetByID(ctx, categoryID)
-        if err != nil </span><span class="cov8" title="1">{
-                return nil, fmt.Errorf("category not found: %w", err)
-        }</span>
+func (a *AuthServiceImpl) ValidateToken(ctx context.Context, accessToken string) (*schema.UserInfoResponse, error) <span class="cov8" title="1">{
+        return a.cognitoService.ValidateAccessToken(ctx, accessToken)
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package auth
 
-        <span class="cov8" title="1">products, err := s.productRepo.GetByCategory(ctx, categoryID)
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "log"
+        "net/http"
+        "net/url"
+
+        "github.com/IainMosima/gomart/configs"
+        "github.com/IainMosima/gomart/domains/auth/schema"
+        "github.com/aws/aws-sdk-go-v2/config"
+        "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
+        "github.com/coreos/go-oidc"
+        "github.com/google/uuid"
+        "golang.org/x/oauth2"
+)
+
+type CognitoService struct {
+        client       *cognitoidentityprovider.Client
+        config       *configs.Config
+        oidcProvider *oidc.Provider
+        oauth2Config oauth2.Config
+}
+
+func NewCognitoService(cfg *configs.Config) (*CognitoService, error) <span class="cov8" title="1">{
+        awsConfig, err := config.LoadDefaultConfig(context.TODO(),
+                config.WithRegion(cfg.AWSRegion),
+        )
+
         if err != nil </span><span class="cov0" title="0">{
-                return nil, err
+                return nil, fmt.Errorf("failed to load AWS config: %w", err)
         }</span>
 
-        <span class="cov8" title="1">responses := make([]*schema.ProductResponse, len(products))
-        for i, product := range products </span><span class="cov8" title="1">{
-                responses[i] = s.entityToResponse(product)
+        <span class="cov8" title="1">client := cognitoidentityprovider.NewFromConfig(awsConfig)
+
+        issuerURL := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s", cfg.AWSRegion, cfg.CognitoUserPoolID)
+        oidcProvider, err := oidc.NewProvider(context.Background(), issuerURL)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to create OIDC provider: %w", err)
         }</span>
 
-        <span class="cov8" title="1">return &amp;schema.ProductListResponse{
-                Products: responses,
-                Total:    int64(len(responses)),
-                Page:     1,
-                Limit:    len(responses),
-                HasNext:  false,
+        <span class="cov0" title="0">oauth2Config := oauth2.Config{
+                ClientID:     cfg.CognitoClientID,
+                ClientSecret: cfg.CognitoClientSecret,
+                RedirectURL:  cfg.CognitoRedirectURI,
+                Endpoint:     oidcProvider.Endpoint(),
+                Scopes:       []string{oidc.ScopeOpenID, "email", "phone"},
+        }
+
+        return &amp;CognitoService{
+                client:       client,
+                config:       cfg,
+                oidcProvider: oidcProvider,
+                oauth2Config: oauth2Config,
         }, nil</span>
 }
 
+func (c *CognitoService) GetAuthURL(state string) (string, error) <span class="cov8" title="1">{
+        baseURL := fmt.Sprintf("https://%s/login", c.config.CognitoDomain)
 
-func (s *ProductServiceImpl) entityToResponse(product *entity.Product) *schema.ProductResponse <span class="cov8" title="1">{
-        return &amp;schema.ProductResponse{
-                ProductID:     product.ProductID,
-                ProductName:   product.ProductName,
-                Description:   product.Description,
-                Price:         product.Price,
-                SKU:           product.SKU,
-                StockQuantity: product.StockQuantity,
-                CategoryID:    product.CategoryID,
-                IsActive:      product.IsActive,
-                CreatedAt:     product.CreatedAt,
-                UpdatedAt:     product.UpdatedAt,
+        authURL := fmt.Sprintf("%s?client_id=%s&amp;response_type=code&amp;scope=email+openid+phone&amp;redirect_uri=%s",
+                baseURL,
+                c.config.CognitoClientID,
+                url.QueryEscape(c.config.CognitoRedirectURI))
+
+        if state != "" </span><span class="cov8" title="1">{
+                authURL += "&amp;state=" + url.QueryEscape(state)
+        }</span>
+
+        <span class="cov8" title="1">log.Printf("Generated Cognito auth URL: %s", authURL)
+
+        return authURL, nil</span>
+}
+
+func (c *CognitoService) ParseIDToken(ctx context.Context, idToken string) (*schema.CognitoUserInfoJWTClaims, error) <span class="cov0" title="0">{
+        verifier := c.oidcProvider.Verifier(&amp;oidc.Config{ClientID: c.config.CognitoClientID})
+
+        token, err := verifier.Verify(ctx, idToken)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to verify token: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">var claims schema.CognitoUserInfoJWTClaims
+        if err := token.Claims(&amp;claims); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to extract claims: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;claims, nil</span>
+}
+
+func (c *CognitoService) ExchangeCodeForTokens(ctx context.Context, code string) (*schema.TokenResponse, error) <span class="cov8" title="1">{
+        rawToken, err := c.oauth2Config.Exchange(ctx, code)
+
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">tokenResp := &amp;schema.TokenResponse{
+                AccessToken:  rawToken.AccessToken,
+                RefreshToken: rawToken.RefreshToken,
+                IDToken:      rawToken.Extra("id_token").(string),
         }
-}</pre>
+
+        return tokenResp, nil</span>
+
+}
+
+func (c *CognitoService) ValidateAccessToken(ctx context.Context, accessToken string) (*schema.UserInfoResponse, error) <span class="cov8" title="1">{
+        userInfoURL := fmt.Sprintf("https://%s/oauth2/userInfo", c.config.CognitoDomain)
+
+        req, err := http.NewRequestWithContext(ctx, "GET", userInfoURL, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create request: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">req.Header.Set("Authorization", "Bearer "+accessToken)
+
+        client := &amp;http.Client{}
+        resp, err := client.Do(req)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to call userInfo endpoint: %w", err)
+        }</span>
+        <span class="cov0" title="0">defer resp.Body.Close()
+
+        if resp.StatusCode != http.StatusOK </span><span class="cov0" title="0">{
+                body, _ := io.ReadAll(resp.Body)
+                return nil, fmt.Errorf("userInfo request failed with status %d: %s", resp.StatusCode, string(body))
+        }</span>
+
+        <span class="cov0" title="0">body, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read response body: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">var userInfoClaims struct {
+                Sub           string `json:"sub"`
+                Username      string `json:"username"`
+                Email         string `json:"email"`
+                EmailVerified string `json:"email_verified"`
+                PhoneNumber   string `json:"phone_number"`
+        }
+
+        if err := json.Unmarshal(body, &amp;userInfoClaims); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse userInfo response: %w", err)
+        }</span>
+        <span class="cov0" title="0">userID, _ := uuid.Parse(userInfoClaims.Sub)
+
+        userInfo := &amp;schema.UserInfoResponse{
+                UserID:        userID,
+                UserName:      userInfoClaims.Username,
+                Email:         userInfoClaims.Email,
+                EmailVerified: userInfoClaims.EmailVerified == "true",
+                PhoneNumber:   userInfoClaims.PhoneNumber,
+        }
+
+        return userInfo, nil</span>
+}
+
+func (c *CognitoService) RefreshTokens(ctx context.Context, refreshToken string) (*schema.TokenResponse, error) <span class="cov8" title="1">{
+        token := &amp;oauth2.Token{
+                RefreshToken: refreshToken,
+        }
+
+        tokenSource := c.oauth2Config.TokenSource(ctx, token)
+        newToken, err := tokenSource.Token()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to refresh token: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">tokenResp := &amp;schema.TokenResponse{
+                AccessToken:  newToken.AccessToken,
+                RefreshToken: newToken.RefreshToken,
+                IDToken:      newToken.Extra("id_token").(string),
+        }
+
+        return tokenResp, nil</span>
+}
+</pre>
 		
 		</div>
 	</body>

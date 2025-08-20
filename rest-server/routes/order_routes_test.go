@@ -8,8 +8,8 @@ import (
 	"github.com/IainMosima/gomart/rest-server/handlers/order"
 	"github.com/IainMosima/gomart/rest-server/middleware"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestSetupOrderRoutes(t *testing.T) {

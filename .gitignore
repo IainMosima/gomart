@@ -44,3 +44,6 @@ bin/
 *.env
 configs/app.env
 backend-assessment.pdf
+
+k8s/*-secret.yaml
+k8s/secrets/
