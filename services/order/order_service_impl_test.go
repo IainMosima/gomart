@@ -14,9 +14,9 @@ import (
 	"github.com/IainMosima/gomart/domains/order/service"
 	productEntity "github.com/IainMosima/gomart/domains/product/entity"
 	productRepo "github.com/IainMosima/gomart/domains/product/repository"
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestNewOrderServiceImpl(t *testing.T) {

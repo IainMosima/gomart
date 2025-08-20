@@ -36,13 +36,14 @@ func LoadConfig(path string) (config Config, err error) {
 	err = viper.ReadInConfig()
 	if err != nil {
 		log.Printf("Warning: Could not read config file: %v", err)
-		return
+		log.Printf("Falling back to environment variables")
 	} else {
 		log.Printf("Using local app.env configuration")
-		err = viper.Unmarshal(&config)
-		if err != nil {
-			return
-		}
+	}
+
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		return
 	}
 
 	return

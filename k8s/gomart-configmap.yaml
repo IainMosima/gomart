@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gomart-config
+  labels:
+    app: gomart-backend
+data:
+  HTTP_SERVER_ADDRESS: ":8080"
+  AWS_REGION: "ap-northeast-1"
+  COGNITO_REDIRECT_URI: "http://localhost:8080/cognito/callback"
+  COGNITO_DOMAIN: "ap-northeast-1ts641lniw.auth.ap-northeast-1.amazoncognito.com"
+  EMAIL_HOST: "smtp.gmail.com"
+  EMAIL_PORT: "587"
+  atUsername: "sandbox"
+  atShortCode: "15548"
+  atSandbox: "true"

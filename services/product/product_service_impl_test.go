@@ -11,9 +11,9 @@ import (
 	"github.com/IainMosima/gomart/domains/product/entity"
 	"github.com/IainMosima/gomart/domains/product/repository"
 	"github.com/IainMosima/gomart/domains/product/schema"
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestNewProductService(t *testing.T) {

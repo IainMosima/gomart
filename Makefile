@@ -64,7 +64,33 @@ seed-products:
 seed: seed-categories seed-products
 	@echo "Seed data loaded successfully!"
 
-seed-verify:
-	psql postgres://root:supersecret@localhost:5432/gomart_db -c "SELECT 'Categories' as type, COUNT(*)::text as count FROM categories WHERE is_deleted = FALSE UNION ALL SELECT 'Products' as type, COUNT(*)::text as count FROM products WHERE is_deleted = FALSE UNION ALL SELECT 'Price Range' as type, CONCAT('KES ', MIN(price), ' - ', MAX(price)) as count FROM products WHERE is_deleted = FALSE;"
+docker-up:
+	docker-compose up --build -d
 
-.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen mockgen-auth mockgen-category mockgen-product mockgen-customer mockgen-order mockgen-all test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed seed-verify
+docker-down:
+	docker-compose down
+
+docker-logs:
+	docker-compose logs -f
+
+k8s-config:
+	kubectl apply -f k8s/gomart-configmap.yaml
+	kubectl apply -f k8s/gomart-secret.yaml
+
+k8s-deploy:
+	kubectl apply -f k8s/
+
+k8s-status:
+	kubectl get deployments,services,pods,configmaps,secrets
+
+k8s-cleanup:
+	kubectl delete -f k8s/
+
+k8s-config-status:
+	kubectl get configmaps,secrets
+	@echo "\n--- ConfigMap details ---"
+	kubectl describe configmap gomart-config
+	@echo "\n--- Secret details ---"
+	kubectl describe secret gomart-secrets
+
+.PHONY: postgres createdb dropdb migratedown migratedown sqlc mockgen mockgen-auth mockgen-category mockgen-product mockgen-customer mockgen-order mockgen-all test test-coverage test-coverage-html test-category test-category-coverage clean-coverage seed-categories seed-products seed docker-up docker-down docker-logs k8s-config k8s-deploy k8s-status k8s-cleanup k8s-config-status

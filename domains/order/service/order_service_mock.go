@@ -9,8 +9,8 @@ import (
 	reflect "reflect"
 
 	schema "github.com/IainMosima/gomart/domains/order/schema"
-	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockOrderService is a mock of OrderService interface.
